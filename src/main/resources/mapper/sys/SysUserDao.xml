@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cmp.modules.sys.dao.SysUserDao">
+
+
+	<resultMap type="io.cmp.modules.sys.entity.SysMenuEntity" id="menuMap">
+		<result property="menuId" column="dept_id"/>
+		<result property="parentId" column="parent_id"/>
+		<result property="name" column="name"/>
+		<result property="url" column="url"/>
+		<result property="perms" column="perms"/>
+		<result property="type" column="type"/>
+		<result property="icon" column="icon"/>
+		<result property="orderNum" column="order_num"/>
+		<result property="operateCode" column="operate_code"/>
+	</resultMap>
+	<!-- 查询用户的所有权限 -->
+	<select id="queryAllPerms" resultType="string">
+		select m.perms from sys_user_role ur 
+			LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id 
+			LEFT JOIN sys_menu m on rm.menu_id = m.menu_id 
+		where ur.user_id = #{userId}
+	</select>
+	
+	<!-- 查询用户的所有菜单ID --> 
+	<select id="queryAllMenuId" resultType="long">
+		select distinct rm.menu_id from sys_user_role ur 
+			LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id 
+		where ur.user_id = #{userId}
+	</select>
+	
+	<select id="queryByUserName" resultType="io.cmp.modules.sys.entity.SysUserEntity">
+		select * from sys_user where username = #{username}
+	</select>
+	<!-- 通过用户的ID查询该用户下面的角色 -->
+	<select id="queryRoleListByUserId" resultType="long">
+		SELECT role.*
+		FROM sys_user user inner join  sys_user_role user_role
+		on user.user_id  =user_role.user_id
+		   left join sys_role role on user_role.role_id = role.role_id WHERE user_role.user_id=#{userId} ;
+	</select>
+
+
+<!--	<insert id="batchAddUsers" parameterType="java.util.List">
+		INSERT INTO
+		sys_user
+		VALUES
+		<foreach collection="batchAddUser" item="u" index="index" separator=",">
+			( #{u.}, now(), now(), #{clazz.name})
+		</foreach>
+	</insert>-->
+	<!-- 通过用户的ID查询菜单ID -->
+	<select id="findMenuIdByUserId" resultType="long">
+		select distinct rm.menu_id from sys_user_role ur
+		LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+		where ur.user_id = #{userId}
+	</select>
+
+	<!-- 父Id查询菜单 -->
+	<select id="findMenuByParentId" resultType="io.cmp.modules.sys.entity.SysMenuEntity">
+		select * from sys_menu m
+		where m.parent_id = #{menuId}
+		<if test="menuIds != null">
+			AND m.menu_id IN
+			<foreach collection="menuIds" index="index" item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+    order by order_num asc
+		</if>
+
+	</select>
+
+	<!-- 单纯递归菜单 -->
+	<select id="findMenuByParentId1" resultType="io.cmp.modules.sys.entity.SysMenuEntity">
+		select * from sys_menu m
+		where m.parent_id = #{menuId}
+		<if test="toolBar != null">
+		and m.tool_bar=#{toolBar}
+		</if>
+		order by order_num asc
+	</select>
+
+
+	<!-- 查询用户的所有菜单 -->
+	<select id="queryLevelOneMenu"  resultType="io.cmp.modules.sys.entity.SysMenuEntity">
+		<if test="userId == null">
+			select * from sys_menu
+			where parent_id=#{menuId}
+			<if test="toolBar != null">
+				and tool_bar=#{toolBar}
+			</if>
+		</if>
+		<if test="userId != null">
+		select m.* from sys_user_role ur
+								LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+								LEFT JOIN sys_menu m on rm.menu_id = m.menu_id
+		where ur.user_id = #{userId} and parent_id=#{menuId}
+		<if test="toolBar != null">
+			and m.tool_bar=#{toolBar}
+		</if>
+		</if>
+	</select>
+
+
+	<!-- 查询用户的所有二级菜单 -->
+	<select id="queryLevelTwoMenu" resultType="io.cmp.modules.sys.entity.SysMenuEntity">
+
+		<if test="userId == null">
+			select * from sys_menu
+			where parent_id=#{menuId}
+			<if test="toolBar != null">
+				and tool_bar=#{toolBar}
+			</if>
+		</if>
+
+		<if test="userId != null">
+		select m.* from sys_user_role ur
+								LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+								LEFT JOIN sys_menu m on rm.menu_id = m.menu_id
+		where ur.user_id = #{userId} and parent_id=#{menuId}
+		<if test="toolBar != null">
+			and m.tool_bar=#{toolBar}
+		</if>
+		</if>
+	</select>
+	<!--查询所有用户以及所在部门-->
+	<select id="userList" resultType="io.cmp.modules.sys.entity.SysUserEntity">
+		select * from sys_user
+	</select>
+	<!--查询在该部门下所有用户-->
+	<select id="findByDeptId" resultType="io.cmp.modules.sys.entity.SysUserEntity">
+		select * from sys_user where dept_id=#{deptId}
+	</select>
+</mapper>
+
+

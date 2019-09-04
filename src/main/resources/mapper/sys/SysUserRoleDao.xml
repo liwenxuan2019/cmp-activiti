@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cmp.modules.sys.dao.SysUserRoleDao">
+<resultMap type="io.cmp.modules.sys.entity.SysUserEntity" id="sysUserEntity">
+	<result property="userId" column="user_id"/>
+	<result property="username" column="username"/>
+	<result property="realname" column="realname"/>
+	<result property="isDeptLeader" column="is_dept_leader"/>
+	<result property="expirationTime" column="expiration_time"/>
+
+	<result property="extension" column="extension"/>
+	<result property="email" column="email"/>
+	<result property="mobile" column="mobile"/>
+	<result property="status" column="status"/>
+	<result property="deptId" column="dept_id"/>
+	<result property="sex" column="sex"/>
+	<result property="firstLogin" column="first_login"/>
+	<result property="autoUnlock" column="auto_unlock"/>
+	<result property="createTime" column="create_time"/>
+</resultMap>
+<delete id="deleteBatch">
+	delete from sys_user_role where role_id in
+	<foreach item="roleId" collection="array" open="(" separator="," close=")">
+		#{roleId}
+	</foreach>
+</delete>
+
+<select id="queryRoleIdList" resultType="long">
+	select role_id from sys_user_role where user_id = #{value}
+</select>
+
+<select id="queryUserCount" resultType="long">
+	select count(*) from sys_user_role where role_id = #{roleId}
+</select>
+
+<!--根据roleId查询用户的信息-->
+<select id="queryUserListByroleId" resultMap="sysUserEntity">
+	SELECT * from sys_user WHERE user_id in (SELECT user_id from sys_user_role where role_id = #{roleId})
+</select>
+
+<select id="queryUserIdByroleId"  resultType="long">
+	SELECT user_id from sys_user_role where role_id = #{roleId}
+</select>
+<delete id="deleteBatchByUserId">
+	delete from sys_user_role where user_id in
+	<foreach item="userId" collection="array" open="(" separator="," close=")">
+		#{userId}
+	</foreach>
+</delete>
+</mapper>

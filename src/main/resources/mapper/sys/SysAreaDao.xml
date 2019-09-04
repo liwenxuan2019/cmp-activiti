@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cmp.modules.sys.dao.SysAreaDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.cmp.modules.sys.entity.SysAreaEntity" id="areaMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="parentId" column="parent_id"/>
+    </resultMap>
+
+
+    <select id="queryListParentId" resultMap="areaMap">
+        select id,name,parent_id from sys_area where parent_id = #{parentId}
+    </select>
+
+
+</mapper>

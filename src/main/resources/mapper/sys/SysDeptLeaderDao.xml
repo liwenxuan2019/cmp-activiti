@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cmp.modules.sys.dao.SysDeptLeaderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.cmp.modules.sys.entity.SysDeptLeaderEntity" id="sysDeptLeaderMap">
+        <result property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="realname" column="realname"/>
+    </resultMap>
+    <delete id="deleteBatch">
+        delete from sys_dept_leader where dept_id in
+        <foreach item="deptIds" collection="array" open="(" separator="," close=")">
+            #{deptIds}
+        </foreach>
+    </delete>
+    <!--查询属于本部门的负责人-->
+    <select id="findByUserId" resultMap="sysDeptLeaderMap">
+        select * from sys_dept_leader where user_id = #{userId}
+    </select>
+
+    <!--查询属于本部门的负责人-->
+    <select id="findUserByDeptId" resultMap="sysDeptLeaderMap">
+        select * from sys_dept_leader where dept_id = #{deptId}
+    </select>
+<!--通过userId去删除负责人和部门的关系-->
+    <delete id="deleteByUserId">
+        delete from sys_dept_leader where user_id=#{userId}
+
+    </delete>
+</mapper>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cmp.modules.sys.dao.UkUserDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.cmp.modules.sys.entity.UkUserEntity" id="ukUserMap">
+        <result property="id" column="ID"/>
+        <result property="language" column="LANGUAGE"/>
+        <result property="username" column="USERNAME"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="secureconf" column="SECURECONF"/>
+        <result property="email" column="EMAIL"/>
+        <result property="firstname" column="FIRSTNAME"/>
+        <result property="midname" column="MIDNAME"/>
+        <result property="lastname" column="LASTNAME"/>
+        <result property="jobtitle" column="JOBTITLE"/>
+        <result property="department" column="DEPARTMENT"/>
+        <result property="gender" column="GENDER"/>
+        <result property="birthday" column="BIRTHDAY"/>
+        <result property="nickname" column="NICKNAME"/>
+        <result property="usertype" column="USERTYPE"/>
+        <result property="rulename" column="RULENAME"/>
+        <result property="searchprojectid" column="SEARCHPROJECTID"/>
+        <result property="orgi" column="ORGI"/>
+        <result property="orgid" column="ORGID"/>
+        <result property="creater" column="CREATER"/>
+        <result property="createtime" column="CREATETIME"/>
+        <result property="memo" column="MEMO"/>
+        <result property="updatetime" column="UPDATETIME"/>
+        <result property="organ" column="ORGAN"/>
+        <result property="mobile" column="MOBILE"/>
+        <result property="passupdatetime" column="passupdatetime"/>
+        <result property="sign" column="sign"/>
+        <result property="del" column="del"/>
+        <result property="uname" column="uname"/>
+        <result property="musteditpassword" column="musteditpassword"/>
+        <result property="agent" column="AGENT"/>
+        <result property="skill" column="SKILL"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="fans" column="fans"/>
+        <result property="follows" column="follows"/>
+        <result property="integral" column="integral"/>
+        <result property="lastlogintime" column="lastlogintime"/>
+        <result property="status" column="status"/>
+        <result property="deactivetime" column="deactivetime"/>
+        <result property="title" column="title"/>
+        <result property="datastatus" column="DATASTATUS"/>
+        <result property="callcenter" column="callcenter"/>
+        <result property="superuser" column="SUPERUSER"/>
+        <result property="maxuser" column="maxuser"/>
+        <result property="ordertype" column="ordertype"/>
+        <result property="disabledesk" column="disabledesk"/>
+        <result property="hostid" column="hostid"/>
+        <result property="extid" column="extid"/>
+        <result property="extno" column="extno"/>
+        <result property="bindext" column="bindext"/>
+        <result property="lastdisdate" column="lastdisdate"/>
+        <result property="disnum" column="disnum"/>
+        <result property="lastworkorderdate" column="lastworkorderdate"/>
+        <result property="workordernum" column="workordernum"/>
+        <result property="workorder" column="workorder"/>
+        <result property="bussopdis" column="bussopdis"/>
+        <result property="tenant" column="tenant"/>
+        <result property="userId" column="user_id"/>
+    </resultMap>
+
+    <insert id="insertUkUser" parameterType="io.cmp.modules.sys.entity.UkUserEntity">
+        insert into uk_user (ID,USERNAME,PASSWORD,NICKNAME,MOBILE,EMAIL,uname,SECURECONF,ORGI,ORGID,CREATETIME,UPDATETIME,passupdatetime,user_id) values (#{id},#{username},#{password},#{nickname},#{mobile},#{email},#{uname},#{secureconf},#{orgi},#{orgid},#{createtime},#{updatetime},#{passupdatetime},#{userId})
+    </insert>
+
+</mapper>
