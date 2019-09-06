@@ -158,7 +158,7 @@ public class MessageEventHandler {
     }
 
     /**
-     * 客户端事件
+     * 坐席端事件
      *
      * @param client  　客户端信息
      * @param ackRequest 请求信息
@@ -174,7 +174,7 @@ public class MessageEventHandler {
     }
 
     /**
-     * 客户端事件
+     * 坐席端事件
      *
      * @param client  　客户端信息
      * @param ackRequest 请求信息
