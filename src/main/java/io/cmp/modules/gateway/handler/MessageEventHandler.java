@@ -38,6 +38,10 @@ public class MessageEventHandler {
     //客户端状态Map
     public static ConcurrentMap<String, CustomerInfo> customerStatusMap = new ConcurrentHashMap<>();
 
+
+    //坐席端&客户端映射Map
+    public static ConcurrentMap<String, CustomerInfo> agentAndCustomerMap = new ConcurrentHashMap<>();
+
     /**
      * 客户端连接的时候触发
      *
@@ -169,7 +173,7 @@ public class MessageEventHandler {
         log.info("坐席状态：" + agentInfo.toString());
         ackRequest.sendAckData("agentStatusEvent", "服务器收到信息");
 
-        client.sendEvent("agentStatusEvent", "我是服务器发送的信息");
+        client.sendEvent("agentStatusEvent", "服务器发送的信息");
 
     }
 
@@ -185,7 +189,7 @@ public class MessageEventHandler {
         log.info("发来消息：" + data.toString());
         ackRequest.sendAckData("agentMessageEvent", "服务器收到信息");
 
-        client.sendEvent("agentMessageEvent", "我是服务器发送的信息");
+        client.sendEvent("agentMessageEvent", "服务器发送的信息");
 
 
     }
