@@ -33,10 +33,10 @@ public class MessageEventHandler {
 
 
     //坐席端状态Map
-    public static ConcurrentMap<String, AgentInfo> agentMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, AgentInfo> agentStatusMap = new ConcurrentHashMap<>();
 
     //客户端状态Map
-    public static ConcurrentMap<String, CustomerInfo> customerMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, CustomerInfo> customerStatusMap = new ConcurrentHashMap<>();
 
     /**
      * 客户端连接的时候触发
@@ -73,6 +73,8 @@ public class MessageEventHandler {
 
             //存储坐席SocketIOClient，用于发送消息
             agentSocketIOClientMap.put(agentId, client);
+            //存储坐席状态对象
+            agentStatusMap.put(agentId,agentInfo);
 
             //回发消息
             client.sendEvent("message", "onConnect back");
@@ -100,8 +102,10 @@ public class MessageEventHandler {
             customerInfo.setIpAddress(customerIpAddress);
             customerInfo.setConnectTime(connectTime);
 
-            //存储坐席SocketIOClient，用于发送消息
+            //存储客户SocketIOClient，用于发送消息
             customerSocketIOClientMap.put(customerId, client);
+            //存储客户状态对象
+            customerStatusMap.put(customerId,customerInfo);
 
             //回发消息
             client.sendEvent("message", "onConnect back");
@@ -120,22 +124,35 @@ public class MessageEventHandler {
         //获取用户类型 1：坐席 2：客户
         String userType = client.getHandshakeData().getSingleUrlParam("userType");
 
+
         if(StringUtils.isNotBlank(userType) && "1".equals(userType)) {
             //获取坐席sessionId
             String agentSessionId=client.getSessionId().toString();
+            //获取坐席工号
+            String agentId = client.getHandshakeData().getSingleUrlParam("agentId");
             //获取坐席接入结束时间
             Date disconnectTime = new Date();
             log.info("坐席端:" + agentSessionId+ "断开连接"+",断开时间="+disconnectTime);
+
+            agentSocketIOClientMap.remove(agentId);
+            agentStatusMap.remove(agentId);
         }
 
         if(StringUtils.isNotBlank(userType) && "2".equals(userType))
         {
             //获取客户sessionId
             String customerSessionId=client.getSessionId().toString();
+            //获取客户id
+            String customerId = client.getHandshakeData().getSingleUrlParam("customerId");
+
             //获取客户接入结束时间
             Date disconnectTime = new Date();
 
             log.info("客户端:" + customerSessionId + "断开连接"+",断开时间="+disconnectTime);
+
+            customerSocketIOClientMap.remove(customerId);
+            customerStatusMap.remove(customerId);
+
         }
 
     }
@@ -148,8 +165,9 @@ public class MessageEventHandler {
      * @param agentInfo 客户端发送数据
      */
     @OnEvent(value = "agentStatusEvent")
-    public void agentEvent(SocketIOClient client, AgentInfo agentInfo, AckRequest ackRequest) {
+    public void agentStatusEvent(SocketIOClient client, AgentInfo agentInfo, AckRequest ackRequest) {
         log.info("坐席状态：" + agentInfo.toString());
+        ackRequest.sendAckData("agentStatusEvent", "服务器收到信息");
 
         client.sendEvent("agentStatusEvent", "我是服务器发送的信息");
 
@@ -165,7 +183,7 @@ public class MessageEventHandler {
     @OnEvent(value = "agentMessageEvent")
     public void agentMessageEvent(SocketIOClient client, Message data ,AckRequest ackRequest) {
         log.info("发来消息：" + data.toString());
-
+        ackRequest.sendAckData("agentMessageEvent", "服务器收到信息");
 
         client.sendEvent("agentMessageEvent", "我是服务器发送的信息");
 
@@ -182,8 +200,9 @@ public class MessageEventHandler {
     @OnEvent(value = "customerStatusEvent")
     public void customerStatusEvent(SocketIOClient client, CustomerInfo customerInfo, AckRequest ackRequest) {
         log.info("客户状态：" + customerInfo.toString());
+        ackRequest.sendAckData("customerStatusEvent", "服务器收到信息");
 
-        client.sendEvent("agentStatusEvent", "我是服务器发送的信息");
+        client.sendEvent("customerStatusEvent", "服务器发送的信息");
 
     }
 
@@ -197,9 +216,9 @@ public class MessageEventHandler {
     @OnEvent(value = "customerMessageEvent")
     public void customerMessageEvent(SocketIOClient client, Message data ,AckRequest ackRequest) {
         log.info("发来消息：" + data.toString());
+        ackRequest.sendAckData("customerMessageEvent", "服务器收到信息");
 
-
-        client.sendEvent("customerMessageEvent", "我是服务器发送的信息");
+        client.sendEvent("customerMessageEvent", "服务器发送的信息");
 
 
     }
