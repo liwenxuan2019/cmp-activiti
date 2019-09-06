@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import  io.cmp.modules.gateway.entity.Message;
+import io.cmp.modules.gateway.entity.MessageInfo;
 
 @Component
 @Slf4j
@@ -172,7 +172,7 @@ public class MessageEventHandler {
     public void agentStatusEvent(SocketIOClient client, AgentInfo agentInfo, AckRequest ackRequest) {
         log.info("坐席状态：" + agentInfo.toString());
         ackRequest.sendAckData("agentStatusEvent", "服务器收到信息");
-
+        agentStatusMap.replace(agentInfo.getAgentId(),agentInfo);
         client.sendEvent("agentStatusEvent", "服务器发送的信息");
 
     }
@@ -185,7 +185,7 @@ public class MessageEventHandler {
      * @param data    　客户端发送数据
      */
     @OnEvent(value = "agentMessageEvent")
-    public void agentMessageEvent(SocketIOClient client, Message data ,AckRequest ackRequest) {
+    public void agentMessageEvent(SocketIOClient client, MessageInfo data , AckRequest ackRequest) {
         log.info("发来消息：" + data.toString());
         ackRequest.sendAckData("agentMessageEvent", "服务器收到信息");
 
@@ -205,7 +205,7 @@ public class MessageEventHandler {
     public void customerStatusEvent(SocketIOClient client, CustomerInfo customerInfo, AckRequest ackRequest) {
         log.info("客户状态：" + customerInfo.toString());
         ackRequest.sendAckData("customerStatusEvent", "服务器收到信息");
-
+        customerStatusMap.replace(customerInfo.getCustomerId(),customerInfo);
         client.sendEvent("customerStatusEvent", "服务器发送的信息");
 
     }
@@ -218,7 +218,7 @@ public class MessageEventHandler {
      * @param data    　客户端发送数据
      */
     @OnEvent(value = "customerMessageEvent")
-    public void customerMessageEvent(SocketIOClient client, Message data ,AckRequest ackRequest) {
+    public void customerMessageEvent(SocketIOClient client, MessageInfo data , AckRequest ackRequest) {
         log.info("发来消息：" + data.toString());
         ackRequest.sendAckData("customerMessageEvent", "服务器收到信息");
 
