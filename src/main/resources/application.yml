@@ -76,12 +76,4 @@ com.upload:
       defaultHeadPortrait: /image/upload/headPortrait/0c883a0ac5495a85cee8ec712c8b1d.jpeg
       file.staticAccessPath: image/upload/headPortrait/**
 
-#httpclient
-httpclient:
-  connectTimeout: 1000
-  connectionRequestTimeout: 500
-  defaultMaxPerRoute: 20
-  maxTotal: 100
-  socketTimeout: 10000
-  staleConnectionCheckEnabled: true
-  ukfUrl: http://localhost/touukf.html
+

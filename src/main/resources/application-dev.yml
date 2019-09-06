@@ -52,3 +52,27 @@ spring:
 #      url: jdbc:postgresql://localhost:5432/cmp_security
 #      username: root
 #      password: 123456
+
+#httpclient
+httpclient:
+  connectTimeout: 1000
+  connectionRequestTimeout: 500
+  defaultMaxPerRoute: 20
+  maxTotal: 100
+  socketTimeout: 10000
+  staleConnectionCheckEnabled: true
+  ukfUrl: http://localhost/touukf.html
+
+# netty-socketio 配置
+socketio:
+  host: 192.168.31.94
+  port: 9092
+  bossCount: 1
+  workCount: 100
+  allowCustomRequests: true
+  maxFramePayloadLength: 1048576
+  maxHttpContentLength: 1048576
+  pingInterval: 25000
+  pingTimeout: 6000000
+  upgradeTimeout: 1000000
+
