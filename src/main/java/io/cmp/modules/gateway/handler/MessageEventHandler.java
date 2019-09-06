@@ -76,7 +76,7 @@ public class MessageEventHandler {
 
             //回发消息
             client.sendEvent("message", "onConnect back");
-            log.info("坐席端:" + agentSessionId + ",已连接agentId=" + agentId+",agentnName=" + agentnName+",坐席授权渠道=" + authorizationChannel+",坐席ip地址=" + agentIpAddress+",接入时间="+connectTime);
+            log.info("坐席端:" + agentSessionId + " 已连接 agentId=" + agentId+",agentnName=" + agentnName+",坐席授权渠道=" + authorizationChannel+",坐席ip地址=" + agentIpAddress+",接入时间="+connectTime);
         }
         if(StringUtils.isNotBlank(userType) && "2".equals(userType))
         {
@@ -105,7 +105,7 @@ public class MessageEventHandler {
 
             //回发消息
             client.sendEvent("message", "onConnect back");
-            log.info("客户端:" + customerSessionId + ",已连接customerId=" + customerId+",customerName=" + customerName+",客户访问渠道=" + accessChannel+",客户ip地址=" + customerIpAddress+",接入时间="+connectTime);
+            log.info("客户端:" + customerSessionId + " 已连接 customerId=" + customerId+",customerName=" + customerName+",客户访问渠道=" + accessChannel+",客户ip地址=" + customerIpAddress+",接入时间="+connectTime);
         }
 
     }
@@ -144,33 +144,68 @@ public class MessageEventHandler {
      * 客户端事件
      *
      * @param client  　客户端信息
-     * @param request 请求信息
-     * @param    　客户端发送数据
+     * @param ackRequest 请求信息
+     * @param agentInfo 客户端发送数据
      */
     @OnEvent(value = "agentStatusEvent")
-    public void agentEvent(SocketIOClient client, AckRequest request, AgentInfo agentInfo) {
+    public void agentEvent(SocketIOClient client, AgentInfo agentInfo, AckRequest ackRequest) {
         log.info("坐席状态：" + agentInfo.toString());
 
         client.sendEvent("agentStatusEvent", "我是服务器发送的信息");
-        //广播消息
-        //sendBroadcast();
+
     }
 
     /**
      * 客户端事件
      *
      * @param client  　客户端信息
-     * @param request 请求信息
+     * @param ackRequest 请求信息
      * @param data    　客户端发送数据
      */
     @OnEvent(value = "agentMessageEvent")
-    public void agentMessageEvent(SocketIOClient client, AckRequest request, Message data) {
+    public void agentMessageEvent(SocketIOClient client, Message data ,AckRequest ackRequest) {
         log.info("发来消息：" + data.toString());
+
+
         client.sendEvent("agentMessageEvent", "我是服务器发送的信息");
 
-        //广播消息
-        //sendBroadcast();
+
     }
+
+    /**
+     * 客户端事件
+     *
+     * @param client  　客户端信息
+     * @param ackRequest 请求信息
+     * @param customerInfo 客户端发送数据
+     */
+    @OnEvent(value = "customerStatusEvent")
+    public void customerStatusEvent(SocketIOClient client, CustomerInfo customerInfo, AckRequest ackRequest) {
+        log.info("客户状态：" + customerInfo.toString());
+
+        client.sendEvent("agentStatusEvent", "我是服务器发送的信息");
+
+    }
+
+    /**
+     * 客户端事件
+     *
+     * @param client  　客户端信息
+     * @param ackRequest 请求信息
+     * @param data    　客户端发送数据
+     */
+    @OnEvent(value = "customerMessageEvent")
+    public void customerMessageEvent(SocketIOClient client, Message data ,AckRequest ackRequest) {
+        log.info("发来消息：" + data.toString());
+
+
+        client.sendEvent("customerMessageEvent", "我是服务器发送的信息");
+
+
+    }
+
+
+
 
     /**
      * 广播消息

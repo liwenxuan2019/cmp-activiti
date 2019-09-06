@@ -14,6 +14,8 @@ public class CustomerInfo {
     String customerName;
     //接入渠道 网页聊天:webchart 微信:weixin 微博：weibo QQ:qq 电话：phone
     String accessChannel;
+    //客户优先级 
+    String customerPriority;
     //ip地址
     String ipAddress;
     //接入时间
