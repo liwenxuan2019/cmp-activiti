@@ -12,4 +12,6 @@ public class MessageInfo {
     //消息类型
     private String msgType;
     //消息内容
+    private String msgContent;
+
 }

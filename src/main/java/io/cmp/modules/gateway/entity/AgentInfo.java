@@ -13,7 +13,7 @@ public class AgentInfo {
     String agentnName;
     //授权渠道 网页聊天:webchart 微信:weixin 微博：weibo QQ:qq 电话：phone
     String authorizationChannel;
-    //坐席状态 0:就绪 1：示忙
+    //坐席状态 0:就绪 1：服务中 2：示忙
     String agentStaus;
     //坐席状态时间
     Date agentStausTime;
