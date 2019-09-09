@@ -210,19 +210,20 @@ public class MessageEventHandler {
     @OnEvent(value = "onCustomerMessageEvent")
     public void onCustomerMessageEvent(SocketIOClient socketIoChannel, MessageInfo data , AckRequest ackRequest) {
         log.info("发来消息：" + data.toString());
-        ackRequest.sendAckData("customerMessageEvent", "服务器收到信息");
+        ackRequest.sendAckData("onCustomerMessageEvent", "服务器收到信息");
 
         //从Messageinfo中获取源ID
         String sourceId=data.getSourceId();
 
-        //通过源ID查询Map获取服务坐席ID
+        //通过源ID查询Map获取坐席ID
         if(sourceId!=null&& StringUtils.isNotBlank(sourceId)) {
             String agentId = customeToAgentMap.get(sourceId);
 
-            //通过坐席服务ID查询到该坐席的socket连接对象
+            //通过坐席ID查询到坐席的socket连接对象
             SocketIOClient agentSocketIOClient = agentSocketIOClientMap.get(agentId);
-            if (agentSocketIOClient != null && agentSocketIOClient.isChannelOpen()) {
-                //通过该socket连接对象转发该消息
+
+            if (agentSocketIOClient!=null && agentSocketIOClient.isChannelOpen()) {
+                //通过坐席socket连接对象转发该消息
                 AgentInfo agentInfo = (AgentInfo) agentStatusMap.get(agentId);
                 if (agentInfo != null && "1".equals(agentInfo.getAgentStaus())) {
                     MessageInfo sendData = new MessageInfo();
@@ -230,7 +231,7 @@ public class MessageEventHandler {
                     sendData.setTargetId(data.getTargetId());
                     sendData.setMsgType("webchat");
                     sendData.setMsgContent(data.getMsgContent());
-                    agentSocketIOClient.sendEvent("customerMessageEvent", sendData);
+                    agentSocketIOClient.sendEvent("onCustomerMessageEvent", sendData);
                 }
             }
         }
@@ -263,27 +264,36 @@ public class MessageEventHandler {
      */
     @OnEvent(value = "onAgentMessageEvent")
     public void onAgentMessageEvent(SocketIOClient socketIoChannel, MessageInfo data , AckRequest ackRequest) {
-        String targetClientId = data.getTargetId();
-        CustomerInfo customerInfo =(CustomerInfo)customerStatusMap.get(targetClientId);
 
         log.info("发来消息：" + data.toString());
-        ackRequest.sendAckData("agentMessageEvent", "服务器收到信息");
+        ackRequest.sendAckData("onAgentMessageEvent", "服务器收到信息");
 
-        if (customerInfo != null && "1".equals(customerInfo.getCustomerStaus()))
-        {
-            // UUID uuid = new UUID(clientInfo.getMostsignbits(), clientInfo.getLeastsignbits());
-            //System.out.println(uuid.toString());
+        //从Messageinfo中获取源ID
+        String sourceId=data.getSourceId();
 
-            MessageInfo sendData = new MessageInfo();
-            sendData.setSourceId(data.getSourceId());
-            sendData.setTargetId(data.getTargetId());
-            sendData.setMsgType("webchat");
-            sendData.setMsgContent(data.getMsgContent());
-            //client.sendEvent("agentMessageEvent", sendData);
+        //通过源ID查询Map获取客户ID
+        if(sourceId!=null&& StringUtils.isNotBlank(sourceId)) {
 
+            String customerId = agentToCustomerMap.get(sourceId);
 
+            //通过客户ID查询到客户的socket连接对象
+            SocketIOClient customerSocketIOClient = customerSocketIOClientMap.get(customerId);
+
+            if (customerSocketIOClient != null && customerSocketIOClient.isChannelOpen()) {
+
+                //通过客户socket连接对象转发该消息
+                CustomerInfo customerInfo = (CustomerInfo) customerStatusMap.get(customerId);
+
+                if (customerInfo != null && "1".equals(customerInfo.getCustomerStaus())) {
+                    MessageInfo sendData = new MessageInfo();
+                    sendData.setSourceId(data.getSourceId());
+                    sendData.setTargetId(data.getTargetId());
+                    sendData.setMsgType("webchat");
+                    sendData.setMsgContent(data.getMsgContent());
+                    customerSocketIOClient.sendEvent("onAgentMessageEvent", sendData);
+                }
+            }
         }
-
     }
 
 
