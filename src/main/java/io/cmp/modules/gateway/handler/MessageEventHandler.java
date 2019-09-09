@@ -9,6 +9,7 @@ import com.corundumstudio.socketio.annotation.OnEvent;
 import io.cmp.modules.gateway.entity.AgentInfo;
 import io.cmp.modules.gateway.entity.CustomerInfo;
 import io.cmp.modules.gateway.utils.AcdUtils;
+import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,27 +213,27 @@ public class MessageEventHandler {
         ackRequest.sendAckData("customerMessageEvent", "服务器收到信息");
 
         //从Messageinfo中获取源ID
+        String sourceId=data.getSourceId();
 
         //通过源ID查询Map获取服务坐席ID
+        if(sourceId!=null&& StringUtils.isNotBlank(sourceId)) {
+            String agentId = customeToAgentMap.get(sourceId);
 
-        //通过坐席服务ID查询到该坐席的socket连接对象
-
-        //通过该socket连接对象转发该消息
-
-        String targetClientId = data.getTargetId();
-        AgentInfo agentInfo =(AgentInfo)agentStatusMap.get(targetClientId);
-        if (agentInfo != null && "1".equals(agentInfo.getAgentStaus()))
-        {
-            MessageInfo sendData = new MessageInfo();
-            sendData.setSourceId(data.getSourceId());
-            sendData.setTargetId(data.getTargetId());
-            sendData.setMsgType("webchat");
-            sendData.setMsgContent(data.getMsgContent());
-            //client.sendEvent("customerMessageEvent", sendData);
+            //通过坐席服务ID查询到该坐席的socket连接对象
+            SocketIOClient agentSocketIOClient = agentSocketIOClientMap.get(agentId);
+            if (agentSocketIOClient != null && agentSocketIOClient.isChannelOpen()) {
+                //通过该socket连接对象转发该消息
+                AgentInfo agentInfo = (AgentInfo) agentStatusMap.get(agentId);
+                if (agentInfo != null && "1".equals(agentInfo.getAgentStaus())) {
+                    MessageInfo sendData = new MessageInfo();
+                    sendData.setSourceId(data.getSourceId());
+                    sendData.setTargetId(data.getTargetId());
+                    sendData.setMsgType("webchat");
+                    sendData.setMsgContent(data.getMsgContent());
+                    agentSocketIOClient.sendEvent("customerMessageEvent", sendData);
+                }
+            }
         }
-
-
-
     }
 
 
