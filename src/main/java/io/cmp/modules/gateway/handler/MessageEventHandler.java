@@ -49,7 +49,6 @@ public class MessageEventHandler {
     public static ConcurrentMap<String, String> agentToCustomerMap = new ConcurrentHashMap<>();
 
 
-
     /**
      * 客户端连接的时候触发
      *
@@ -97,6 +96,7 @@ public class MessageEventHandler {
             String distributionAgentId = AcdUtils.distribution(agentStatusMap);
             //建立客户与坐席的对应表Map
             customeToAgentMap.put(customerId,distributionAgentId);
+            agentToCustomerMap.put(distributionAgentId,customerId);
         }
         if(StringUtils.isNotBlank(userType) && "2".equals(userType))
         {
@@ -132,11 +132,7 @@ public class MessageEventHandler {
             client.sendEvent("message", "onConnect back");
             log.info("坐席端:" + agentSessionId + " 已连接 agentId=" + agentId+",agentnName=" + agentnName+",坐席授权渠道=" + authorizationChannel+",坐席ip地址=" + agentIpAddress+",接入时间="+connectTime);
 
-
-
         }
-
-
 
     }
 
@@ -162,6 +158,7 @@ public class MessageEventHandler {
 
             agentSocketIOClientMap.remove(agentId);
             agentStatusMap.remove(agentId);
+            agentToCustomerMap.remove(agentId);
         }
 
         if(StringUtils.isNotBlank(userType) && "2".equals(userType))
@@ -178,58 +175,13 @@ public class MessageEventHandler {
 
             customerSocketIOClientMap.remove(customerId);
             customerStatusMap.remove(customerId);
+            customeToAgentMap.remove(customerId);
 
         }
 
     }
 
-    /**
-     * 坐席端事件
-     *
-     * @param client  　客户端信息
-     * @param ackRequest 请求信息
-     * @param agentInfo 客户端发送数据
-     */
-    @OnEvent(value = "agentStatusEvent")
-    public void agentStatusEvent(SocketIOClient client, AgentInfo agentInfo, AckRequest ackRequest) {
-        log.info("坐席状态：" + agentInfo.toString());
-        ackRequest.sendAckData("agentStatusEvent", "服务器收到信息");
-        agentStatusMap.replace(agentInfo.getAgentId(),agentInfo);
-        client.sendEvent("agentStatusEvent", "服务器发送的信息");
 
-    }
-
-    /**
-     * 坐席端事件
-     *
-     * @param socketIoChannel  　客户端信息
-     * @param ackRequest 请求信息
-     * @param data    　客户端发送数据
-     */
-    @OnEvent(value = "agentMessageEvent")
-    public void agentMessageEvent(SocketIOClient socketIoChannel, MessageInfo data , AckRequest ackRequest) {
-        String targetClientId = data.getTargetId();
-        CustomerInfo customerInfo =(CustomerInfo)customerStatusMap.get(targetClientId);
-
-        log.info("发来消息：" + data.toString());
-        ackRequest.sendAckData("agentMessageEvent", "服务器收到信息");
-
-        if (customerInfo != null && "1".equals(customerInfo.getCustomerStaus()))
-        {
-           // UUID uuid = new UUID(clientInfo.getMostsignbits(), clientInfo.getLeastsignbits());
-            //System.out.println(uuid.toString());
-
-            MessageInfo sendData = new MessageInfo();
-            sendData.setSourceId(data.getSourceId());
-            sendData.setTargetId(data.getTargetId());
-            sendData.setMsgType("webchat");
-            sendData.setMsgContent(data.getMsgContent());
-            //client.sendEvent("agentMessageEvent", sendData);
-
-
-        }
-
-    }
 
     /**
      * 客户端事件
@@ -238,12 +190,12 @@ public class MessageEventHandler {
      * @param ackRequest 请求信息
      * @param customerInfo 客户端发送数据
      */
-    @OnEvent(value = "customerStatusEvent")
-    public void customerStatusEvent(SocketIOClient client, CustomerInfo customerInfo, AckRequest ackRequest) {
+    @OnEvent(value = "onCustomerStatusEvent")
+    public void onCustomerStatusEvent(SocketIOClient client, CustomerInfo customerInfo, AckRequest ackRequest) {
         log.info("客户状态：" + customerInfo.toString());
-        ackRequest.sendAckData("customerStatusEvent", "服务器收到信息");
+        ackRequest.sendAckData("onCustomerStatusEvent", "服务器收到信息");
         customerStatusMap.replace(customerInfo.getCustomerId(),customerInfo);
-        client.sendEvent("customerStatusEvent", "服务器发送的信息");
+        client.sendEvent("onCustomerStatusEvent", "服务器发送的信息");
 
     }
 
@@ -254,8 +206,8 @@ public class MessageEventHandler {
      * @param ackRequest 请求信息
      * @param data    　客户端发送数据
      */
-    @OnEvent(value = "customerMessageEvent")
-    public void customerMessageEvent(SocketIOClient socketIoChannel, MessageInfo data , AckRequest ackRequest) {
+    @OnEvent(value = "onCustomerMessageEvent")
+    public void onCustomerMessageEvent(SocketIOClient socketIoChannel, MessageInfo data , AckRequest ackRequest) {
         log.info("发来消息：" + data.toString());
         ackRequest.sendAckData("customerMessageEvent", "服务器收到信息");
 
@@ -283,6 +235,55 @@ public class MessageEventHandler {
 
     }
 
+
+
+    /**
+     * 坐席端事件
+     *
+     * @param client  　客户端信息
+     * @param ackRequest 请求信息
+     * @param agentInfo 客户端发送数据
+     */
+    @OnEvent(value = "onAgentStatusEvent")
+    public void onAgentStatusEvent(SocketIOClient client, AgentInfo agentInfo, AckRequest ackRequest) {
+        log.info("坐席状态：" + agentInfo.toString());
+        ackRequest.sendAckData("onAgentStatusEvent", "服务器收到信息");
+        agentStatusMap.replace(agentInfo.getAgentId(),agentInfo);
+        client.sendEvent("onAgentStatusEvent", "服务器发送的信息");
+
+    }
+
+    /**
+     * 坐席端事件
+     *
+     * @param socketIoChannel  　客户端信息
+     * @param ackRequest 请求信息
+     * @param data    　客户端发送数据
+     */
+    @OnEvent(value = "onAgentMessageEvent")
+    public void onAgentMessageEvent(SocketIOClient socketIoChannel, MessageInfo data , AckRequest ackRequest) {
+        String targetClientId = data.getTargetId();
+        CustomerInfo customerInfo =(CustomerInfo)customerStatusMap.get(targetClientId);
+
+        log.info("发来消息：" + data.toString());
+        ackRequest.sendAckData("agentMessageEvent", "服务器收到信息");
+
+        if (customerInfo != null && "1".equals(customerInfo.getCustomerStaus()))
+        {
+            // UUID uuid = new UUID(clientInfo.getMostsignbits(), clientInfo.getLeastsignbits());
+            //System.out.println(uuid.toString());
+
+            MessageInfo sendData = new MessageInfo();
+            sendData.setSourceId(data.getSourceId());
+            sendData.setTargetId(data.getTargetId());
+            sendData.setMsgType("webchat");
+            sendData.setMsgContent(data.getMsgContent());
+            //client.sendEvent("agentMessageEvent", sendData);
+
+
+        }
+
+    }
 
 
 
