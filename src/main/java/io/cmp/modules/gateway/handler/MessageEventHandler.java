@@ -12,6 +12,8 @@ import io.cmp.modules.gateway.utils.AcdUtils;
 import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,7 @@ import io.cmp.modules.gateway.entity.MessageInfo;
 @Component
 @Slf4j
 public class MessageEventHandler {
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private SocketIOServer socketIoServer;
@@ -91,7 +94,7 @@ public class MessageEventHandler {
 
             //回发消息
             client.sendEvent("message", "onConnect back");
-            log.info("客户端:" + customerSessionId + " 已连接 customerId=" + customerId+",customerName=" + customerName+",客户访问渠道=" + accessChannel+",客户ip地址=" + customerIpAddress+",接入时间="+connectTime);
+            logger.info("客户端:" + customerSessionId + " 已连接 customerId=" + customerId+",customerName=" + customerName+",客户访问渠道=" + accessChannel+",客户ip地址=" + customerIpAddress+",接入时间="+connectTime);
 
             //分配适合的坐席服务
             String distributionAgentId = AcdUtils.distribution(agentStatusMap);
@@ -131,7 +134,7 @@ public class MessageEventHandler {
 
             //回发消息
             client.sendEvent("message", "onConnect back");
-            log.info("坐席端:" + agentSessionId + " 已连接 agentId=" + agentId+",agentnName=" + agentnName+",坐席授权渠道=" + authorizationChannel+",坐席ip地址=" + agentIpAddress+",接入时间="+connectTime);
+            logger.info("坐席端:" + agentSessionId + " 已连接 agentId=" + agentId+",agentnName=" + agentnName+",坐席授权渠道=" + authorizationChannel+",坐席ip地址=" + agentIpAddress+",接入时间="+connectTime);
 
         }
 
@@ -155,7 +158,7 @@ public class MessageEventHandler {
             String agentId = client.getHandshakeData().getSingleUrlParam("agentId");
             //获取坐席接入结束时间
             Date disconnectTime = new Date();
-            log.info("坐席端:" + agentSessionId+ "断开连接"+",断开时间="+disconnectTime);
+            logger.info("坐席端:" + agentSessionId+ "断开连接"+",断开时间="+disconnectTime);
 
             agentSocketIOClientMap.remove(agentId);
             agentStatusMap.remove(agentId);
@@ -172,7 +175,7 @@ public class MessageEventHandler {
             //获取客户接入结束时间
             Date disconnectTime = new Date();
 
-            log.info("客户端:" + customerSessionId + "断开连接"+",断开时间="+disconnectTime);
+            logger.info("客户端:" + customerSessionId + "断开连接"+",断开时间="+disconnectTime);
 
             customerSocketIOClientMap.remove(customerId);
             customerStatusMap.remove(customerId);
@@ -193,7 +196,7 @@ public class MessageEventHandler {
      */
     @OnEvent(value = "onCustomerStatusEvent")
     public void onCustomerStatusEvent(SocketIOClient client, CustomerInfo customerInfo, AckRequest ackRequest) {
-        log.info("客户状态：" + customerInfo.toString());
+        logger.info("客户状态：" + customerInfo.toString());
         ackRequest.sendAckData("onCustomerStatusEvent", "服务器收到信息");
         customerStatusMap.replace(customerInfo.getCustomerId(),customerInfo);
         client.sendEvent("onCustomerStatusEvent", "服务器发送的信息");
@@ -209,7 +212,7 @@ public class MessageEventHandler {
      */
     @OnEvent(value = "onCustomerMessageEvent")
     public void onCustomerMessageEvent(SocketIOClient socketIoChannel, MessageInfo data , AckRequest ackRequest) {
-        log.info("发来消息：" + data.toString());
+        logger.info("发来消息：" + data.toString());
         ackRequest.sendAckData("onCustomerMessageEvent", "服务器收到信息");
 
         //从Messageinfo中获取源ID
@@ -248,7 +251,7 @@ public class MessageEventHandler {
      */
     @OnEvent(value = "onAgentStatusEvent")
     public void onAgentStatusEvent(SocketIOClient client, AgentInfo agentInfo, AckRequest ackRequest) {
-        log.info("坐席状态：" + agentInfo.toString());
+        logger.info("坐席状态：" + agentInfo.toString());
         ackRequest.sendAckData("onAgentStatusEvent", "服务器收到信息");
         agentStatusMap.replace(agentInfo.getAgentId(),agentInfo);
         client.sendEvent("onAgentStatusEvent", "服务器发送的信息");
@@ -265,7 +268,7 @@ public class MessageEventHandler {
     @OnEvent(value = "onAgentMessageEvent")
     public void onAgentMessageEvent(SocketIOClient socketIoChannel, MessageInfo data , AckRequest ackRequest) {
 
-        log.info("发来消息：" + data.toString());
+        logger.info("发来消息：" + data.toString());
         ackRequest.sendAckData("onAgentMessageEvent", "服务器收到信息");
 
         //从Messageinfo中获取源ID
