@@ -99,9 +99,16 @@ public class MessageEventHandler {
             AcdUtils acdUtils =new AcdUtils();
             //分配适合的坐席服务
             String distributionAgentId = acdUtils.distribution(agentStatusMap);
-            //建立客户与坐席的对应表Map
-            customeToAgentMap.put(customerId,distributionAgentId);
-            agentToCustomerMap.put(distributionAgentId,customerId);
+
+            if(distributionAgentId!=null&&StringUtils.isNotBlank(distributionAgentId)) {
+                //建立客户与坐席的对应表Map
+                customeToAgentMap.put(customerId, distributionAgentId);
+                agentToCustomerMap.put(distributionAgentId, customerId);
+            }
+            else
+            {
+                logger.info("没有空闲坐席");
+            }
         }
         if(StringUtils.isNotBlank(userType) && "2".equals(userType))
         {
