@@ -21,7 +21,7 @@ public class AcdUtils {
             String randomKey = keys[random.nextInt(keys.length)];
             logger.info("randomKey=" + randomKey);
             AgentInfo agentInfo = agentStatusMap.get(randomKey);
-            if("1".equals(agentInfo.getAgentStaus()) || "2".equals(agentInfo.getAgentStaus())) {
+            if("1".equals(agentInfo.getAgentStatus()) || "2".equals(agentInfo.getAgentStatus())) {
                 agentId = agentInfo.getAgentId();
                 logger.info("agentId=" + agentId);
                 break;

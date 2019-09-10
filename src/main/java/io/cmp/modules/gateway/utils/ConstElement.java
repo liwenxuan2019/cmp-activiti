@@ -9,9 +9,9 @@ public final class ConstElement {
 
     //定义渠道类型：微信原生、微信网页、网页聊天、微博、QQ
     //微信原生
-    public static final String chanType_wexin = "wexin";
+    public static final String chanType_weixin = "weixin";
     //微信web渠道
-    public static final String chanType_wexin_web = "wexin_web";
+    public static final String chanType_weixin_web = "weixin_web";
     //web聊天
     public static final String chanType_webchat = "webchat";
     //微博
@@ -32,7 +32,7 @@ public final class ConstElement {
     //通知类
     public static final String msgType_notice = "notice";
     //命令类
-    public static final String msgType_commond = "commond";
+    public static final String msgType_command = "command";
     //交互聊天类
     public static final String msgType_chat = "chat";
 
@@ -40,7 +40,7 @@ public final class ConstElement {
      * 定义Event类型：在前端和后端收到消息时的事件类别定义
      * 座席更新状态：服务端收到这个消息后在该消息的函数内处理更新座席状态，数据结构体使用AgentInfo
      * 座席消息类型（双向）：正常的消息，数据结构体使用MessageInfo
-     * 客户状态更新类型：客户端的状态如果发生改变，使用该事件定义，数据结构体使用CoustomerInfo
+     * 客户状态更新类型：客户端的状态如果发生改变，使用该事件定义，数据结构体使用CustomerInfo
      * 客户消息类型（双向）：正常的消息，数据结构体使用MessageInfo
      * 通知类消息：没有指定数据结构体，使用字符串即可。
      */
@@ -70,5 +70,12 @@ public final class ConstElement {
     //视频
     public static final String contentType_video = "video";
 
+    /**
+     * 定义命令消息的类型
+     * 转给机器人、转给人工、转电话
+     */
+    public static final String commandType_toRobot = "toRobot";
+    public static final String commandType_toAgent = "toAgent";
+    public static final String commandType_toCall = "toCall";
 
 }
