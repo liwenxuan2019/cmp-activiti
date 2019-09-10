@@ -10,12 +10,13 @@ import java.util.concurrent.ConcurrentMap;
 
 public class AcdUtils {
     private Logger logger = LoggerFactory.getLogger(getClass());
-    public static String distribution(ConcurrentMap<String, AgentInfo> agentStatusMap)
+    public String distribution(ConcurrentMap<String, AgentInfo> agentStatusMap)
     {
         String[] keys = (String[])agentStatusMap.keySet().toArray(new String[0]);
         Random random = new Random();
         String randomKey = keys[random.nextInt(keys.length)];
         AgentInfo agentInfo = agentStatusMap.get(randomKey);
+        logger.info("agentInfo="+agentInfo);
         String agentId = agentInfo.getAgentId();
         return agentId;
     }

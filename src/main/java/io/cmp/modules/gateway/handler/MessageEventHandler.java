@@ -96,8 +96,9 @@ public class MessageEventHandler {
             client.sendEvent("message", "onConnect back");
             logger.info("客户端:" + customerSessionId + " 已连接 customerId=" + customerId+",customerName=" + customerName+",客户访问渠道=" + accessChannel+",客户ip地址=" + customerIpAddress+",接入时间="+connectTime);
 
+            AcdUtils acdUtils =new AcdUtils();
             //分配适合的坐席服务
-            String distributionAgentId = AcdUtils.distribution(agentStatusMap);
+            String distributionAgentId = acdUtils.distribution(agentStatusMap);
             //建立客户与坐席的对应表Map
             customeToAgentMap.put(customerId,distributionAgentId);
             agentToCustomerMap.put(distributionAgentId,customerId);
