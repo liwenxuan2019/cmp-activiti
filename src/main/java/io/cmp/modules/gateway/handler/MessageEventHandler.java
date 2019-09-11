@@ -321,6 +321,7 @@ public class MessageEventHandler {
             if(sourceId!=null&& StringUtils.isNotBlank(sourceId)) {
 
                 String customerId = agentToCustomerMap.get(sourceId);
+                logger.info("customerId="+customerId);
 
                 //通过客户ID查询到客户的socket连接对象
                 SocketIOClient customerSocketIOClient = customerToSocketMap.get(customerId);
