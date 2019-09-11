@@ -63,7 +63,7 @@ public class MessageEventHandler {
     @OnConnect
     public void onConnect(SocketIOClient socket) {
         String socketKey = socket.getSessionId() + socket.getRemoteAddress().toString();
-        logger.info("socketKey is {}", socketKey);
+        logger.info("socketKey is { }", socketKey);
 
         //获取用户类型 1：客户 2：坐席
         String userType = socket.getHandshakeData().getSingleUrlParam("userType");
