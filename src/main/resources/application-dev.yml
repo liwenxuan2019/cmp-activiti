@@ -73,6 +73,6 @@ socketio:
   maxFramePayloadLength: 1048576
   maxHttpContentLength: 1048576
   pingInterval: 25000
-  pingTimeout: 6000000
-  upgradeTimeout: 1000000
+  pingTimeout: 60000
+  upgradeTimeout: 10000
 

@@ -24,8 +24,17 @@ public class MessageInfo {
      * 座席发出消息：该字段值为座席ID
      */
     private String sourceId;
-    //如果有消息发出发的名字就填上去
+    //发送方名称
     private String sourceName;
+
+    /**
+     * 接受方ID
+     *
+     */
+    private String targetId;
+    //接收方名称
+    private  String targetName;
+
 
     /**
      * 定义消息类型(从常量中选择，不要自行写)

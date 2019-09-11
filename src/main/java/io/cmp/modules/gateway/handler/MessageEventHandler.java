@@ -98,7 +98,7 @@ public class MessageEventHandler {
             //回发消息,通过定义好的方式进行
             MessageInfo msgInfo = new MessageInfo();
             msgInfo.setMsgType(ConstElement.msgType_notice);
-            msgInfo.setMsgContent("已经建立连接，请等待为您分配座席");
+            msgInfo.setMsgContent("客户端已经建立连接，请等待为您分配座席");
             socket.sendEvent(ConstElement.eventType_customerMsg, msgInfo);
             logger.info("客户端已连接 customerId=" + customerId+",customerName=" + customerName+",客户访问渠道=" + accessChannel+",客户ip地址=" + customerIpAddress+",接入时间="+connectTime);
 
@@ -138,15 +138,21 @@ public class MessageEventHandler {
             //存储socket对座席id
             socketToAgentMap.put(socket,agentId);
 
+            //回发消息,通过定义好的方式进行
+            MessageInfo msgInfo = new MessageInfo();
+            msgInfo.setMsgType(ConstElement.msgType_notice);
+            msgInfo.setMsgContent("座席端已经建立连接，开始服务");
             //回发消息
-            socket.sendEvent("message", "onConnect back");
+            socket.sendEvent(ConstElement.eventType_agentMsg, msgInfo);
             logger.info("坐席端已连接 agentId=" + agentId+",agentnName=" + agentnName+",坐席授权渠道=" + authorizationChannel+",坐席ip地址=" + agentIpAddress+",接入时间="+connectTime);
 
         }
         //非法注册消息，直接关闭socket
         else{
             socket.sendEvent(ConstElement.eventType_Notice,"你是非法注册用户");
+            logger.info("你是非法注册用户" );
             socket.disconnect();
+
         }
 
     }
@@ -158,42 +164,49 @@ public class MessageEventHandler {
      */
     @OnDisconnect
     public void onDisconnect(SocketIOClient socket) {
+
         //通过socket对象找到是哪个socket断开，需要找到客户id或者座席id
         //先查找座席map
         String strFind = "";
         strFind = socketToAgentMap.remove(socket);
         if(StringUtils.isNotBlank(strFind)){
-            logger.info("onDisconnect座席断开，ID="+strFind);
+            logger.info("onDisconnect 座席端断开，strFind="+strFind);
+
             //删除座席socket Map
             agentToSocketMap.remove(strFind);
 
             //删除并 获取该坐席服务的客户ID
             String strCusID = agentToCustomerMap.remove(strFind);
+            logger.info("strCusID="+strCusID);
 
-            //删除并查找客户socket准备发消息
-            SocketIOClient socketCustomer = customerToSocketMap.remove(strCusID);
-            MessageInfo msgInfo = new MessageInfo();
-            msgInfo.setMsgType(ConstElement.msgType_notice);
-            msgInfo.setMsgContent("座席已经结束服务");
-            socketCustomer.sendEvent(ConstElement.eventType_customerMsg,msgInfo);
+            if(StringUtils.isNotBlank(strCusID)) {
+                //删除并查找客户socket准备发消息
+                SocketIOClient socketCustomer = customerToSocketMap.remove(strCusID);
+                MessageInfo msgInfo = new MessageInfo();
+                msgInfo.setMsgType(ConstElement.msgType_notice);
+                msgInfo.setMsgContent("座席已经结束服务");
+                socketCustomer.sendEvent(ConstElement.eventType_customerMsg, msgInfo);
 
-            //关闭socket
-            socketCustomer.disconnect();
+                //关闭socket
+                socketCustomer.disconnect();
 
-            //触发分配座席
-            allocateAgent();
+                //触发分配座席
+                allocateAgent();
+            }
         }
 
         //查找客户map，看是否是客户端主动断开的
         strFind = socketToCustomerMap.remove(socket);
         if(StringUtils.isNotBlank(strFind)) {
-            logger.info("onDisconnect客户断开，ID="+strFind);
+            logger.info("onDisconnect 客户端断开，strFind="+strFind);
+
             //删除座席socket Map
             customerToSocketMap.remove(strFind);
 
             //删除并 获取该坐席服务的客户ID
             String strAgentID = customerToAgentMap.remove(strFind);
-
+            logger.info("strAgentID="+strAgentID);
+            if(StringUtils.isNotBlank(strAgentID)) {
             //删除并查找座席socket准备发消息
             SocketIOClient socketAgent = agentToSocketMap.remove(strAgentID);
             MessageInfo msgInfo = new MessageInfo();
@@ -207,6 +220,7 @@ public class MessageEventHandler {
 
             //触发分配座席
             allocateAgent();
+            }
         }
 
     }
@@ -221,10 +235,13 @@ public class MessageEventHandler {
      */
     @OnEvent(value = "onCustomerStatusEvent")
     public void onCustomerStatusEvent(SocketIOClient socket, CustomerInfo customerInfo, AckRequest ackRequest) {
-        logger.info("客户状态：" + customerInfo.toString());
-        ackRequest.sendAckData("onCustomerStatusEvent", "服务器收到信息");
+        logger.info("onCustomerStatusEvent 客户状态信息：" + customerInfo.toString());
+
         customerStatusMap.replace(customerInfo.getCustomerId(),customerInfo);
-        socket.sendEvent("onCustomerStatusEvent", "服务器发送的信息");
+        MessageInfo msgInfo = new MessageInfo();
+        msgInfo.setMsgType(ConstElement.msgType_notice);
+        msgInfo.setMsgContent("客户状态更新成功");
+        socket.sendEvent(ConstElement.eventType_customerMsg,msgInfo);
 
     }
 
@@ -236,7 +253,7 @@ public class MessageEventHandler {
      */
     @OnEvent(value = "onCustomerMessageEvent")
     public void onCustomerMessageEvent(SocketIOClient socket, MessageInfo data) {
-        logger.info("发来消息：" + data.toString());
+        logger.info("onCustomerMessageEvent 发来消息：" + data.toString());
         socket.sendEvent(ConstElement.eventType_Notice,"收到你发来的消息"+data.toString());
 
         //从Messageinfo中获取源ID
@@ -272,8 +289,8 @@ public class MessageEventHandler {
      * @param agentInfo 客户端发送数据
      */
     @OnEvent(value = "onAgentStatusEvent")
-    public void onAgentStatusEvent(SocketIOClient socket, AgentInfo agentInfo) {
-        logger.info("onAgentStatusEvent收到坐席更新消息：" + agentInfo.toString());
+    public void onAgentStatusEvent(SocketIOClient socket, AgentInfo agentInfo, AckRequest ackRequest) {
+        logger.info("onAgentStatusEvent 坐席状态信息：" + agentInfo.toString());
 
         agentStatusMap.replace(agentInfo.getAgentId(),agentInfo);
         MessageInfo msgInfo = new MessageInfo();
@@ -292,8 +309,8 @@ public class MessageEventHandler {
     @OnEvent(value = "onAgentMessageEvent")
     public void onAgentMessageEvent(SocketIOClient socket, MessageInfo data) {
 
-        logger.info("onAgentMessageEvent发来消息：" + data.toString());
-        socket.sendEvent(ConstElement.eventType_Notice,"收到消息");
+        logger.info("onAgentMessageEvent 发来消息：" + data.toString());
+        socket.sendEvent(ConstElement.eventType_Notice,"收到你发来的消息"+data.toString());
 
         String msgType = data.getMsgType();
         //聊天类型的消息，需要进行转发

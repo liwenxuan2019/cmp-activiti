@@ -37,11 +37,11 @@ public class NettySocketioConfig {
      */
     @Bean
     public SocketIOServer socketIOServer() {
-        SocketConfig socketConfig = new SocketConfig();
-        socketConfig.setTcpNoDelay(true);
-        socketConfig.setSoLinger(0);
+        //SocketConfig socketConfig = new SocketConfig();
+        //socketConfig.setTcpNoDelay(true);
+        //socketConfig.setSoLinger(0);
         com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
-        config.setSocketConfig(socketConfig);
+        //config.setSocketConfig(socketConfig);
         config.setHostname(host);
         config.setPort(port);
         config.setBossThreads(bossCount);
