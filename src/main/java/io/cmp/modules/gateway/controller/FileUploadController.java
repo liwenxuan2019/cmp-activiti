@@ -20,6 +20,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 
@@ -38,17 +40,20 @@ public class FileUploadController {
         if (file.isEmpty()) {
             throw new RRException("上传文件不能为空");
         }
+        Date date = new Date();
 
         // 获取文件名
         String fileName = file.getOriginalFilename();// 获取文件名
         // 获取后缀
-        String suffixName = fileName.substring(fileName.lastIndexOf("."));
-        // 文件上产的路径
-        String filePath = location;
-        // fileName处理
-        fileName = filePath+ UUID.randomUUID()+fileName;
+        String suffixName = fileName.substring(fileName.lastIndexOf("."))
+                ;
+        // 重新生成唯一文件名，用于存储数据库
+        String newFileName = UUID.randomUUID().toString()+suffixName;
 
-        File savefile = new File(fileName);
+        // 文件上产的路径
+        String filePath = location+new SimpleDateFormat("yyyy/MM/dd/").format(date)+newFileName;
+
+        File savefile = new File(filePath);
         //判断上传文件的保存目录是否存在
         if (!savefile.exists() && !savefile.isDirectory()) {
             logger.info(fileName+"目录不存在，需要创建");
@@ -61,7 +66,7 @@ public class FileUploadController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return R.ok().put("url", fileName);
+        return R.ok().put("url", filePath);
     }
 
 
