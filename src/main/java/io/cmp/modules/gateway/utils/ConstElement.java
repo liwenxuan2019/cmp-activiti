@@ -77,5 +77,6 @@ public final class ConstElement {
     public static final String commandType_toRobot = "toRobot";
     public static final String commandType_toAgent = "toAgent";
     public static final String commandType_toCall = "toCall";
+    public static final String commandType_toDisconnect = "toDisconnect";
 
 }

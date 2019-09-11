@@ -15,6 +15,11 @@ public class AcdUtils {
     {
         String[] keys = (String[])agentStatusMap.keySet().toArray(new String[0]);
 
+        if(keys.length == 0){
+            logger.info("AcdUtils=没有座席登录");
+            return "";
+        }
+
         String agentId=null;
         while(true) {
             Random random = new Random();

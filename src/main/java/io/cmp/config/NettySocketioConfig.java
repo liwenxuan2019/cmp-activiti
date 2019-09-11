@@ -50,6 +50,7 @@ public class NettySocketioConfig {
         config.setUpgradeTimeout(upgradeTimeout);
         config.setPingTimeout(pingTimeout);
         config.setPingInterval(pingInterval);
+        config.setRandomSession(true);
         return new SocketIOServer(config);
     }
 
