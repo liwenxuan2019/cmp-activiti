@@ -19,8 +19,8 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
   servlet:
     multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
+      max-file-size: 10MB
+      max-request-size: 10MB
       enabled: true
 
   devtools:
@@ -72,8 +72,10 @@ mybatis-plus:
     jdbc-type-for-null: 'null'
 
 com.upload:
-      location: c:/image/upload/headPortrait/
-      defaultHeadPortrait: /image/upload/headPortrait/0c883a0ac5495a85cee8ec712c8b1d.jpeg
-      file.staticAccessPath: image/upload/headPortrait/**
+      location: c:/images/webchat/
+      file.staticAccessPath: images/webchat/**
+
+
+
 
 

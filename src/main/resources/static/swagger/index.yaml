@@ -51,6 +51,27 @@ paths:
           schema:
             $ref: '#/definitions/Login'
 
+  /file/upload:
+    post:
+      tags:
+        - 文件服务
+      summary: 上传文件
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: file
+          description: 文件
+          in: formData
+          type: file
+          required: true
+      responses:
+        '200':
+          description: 返回文件列表
+          schema:
+            $ref: '#/definitions/R'
+
 
 #定义数据模型
 definitions:
