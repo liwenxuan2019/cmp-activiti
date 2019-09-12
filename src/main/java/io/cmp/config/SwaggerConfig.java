@@ -39,8 +39,8 @@ public class SwaggerConfig implements WebMvcConfigurer {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-            .title("客户关系权限管理平台")
-            .description("cmp-security文档")
+            .title("客户关系管理网关平台")
+            .description("cmp-gateway文档")
             .termsOfServiceUrl("https://www.sinosoft.com.cn")
             .version("3.0.0")
             .build();

@@ -55,14 +55,14 @@ public class OAuth2Filter extends AuthenticatingFilter {
 //        如果是免token登陆的话修改密码的话可以放过
 
 
-        logger.debug("URL\t" + ((HttpServletRequest) request).getRequestURI());
-        if (((HttpServletRequest) request).getRequestURI().contains("/cmp-security/image/upload/headPortrait/")) {
-            logger.debug("URL进了\t" + ((HttpServletRequest) request).getRequestURI());
+        //logger.debug("URL\t" + ((HttpServletRequest) request).getRequestURI());
+        if (((HttpServletRequest) request).getRequestURI().contains("cmp-gateway/images/webchat/")) {
+            //logger.debug("URL进了\t" + ((HttpServletRequest) request).getRequestURI());
 
             return true;
         }else {
             if (StringUtils.isBlank(token)) {
-                logger.debug("URL1111\t" + ((HttpServletRequest) request).getRequestURI());
+                //logger.debug("URL1111\t" + ((HttpServletRequest) request).getRequestURI());
                 HttpServletResponse httpResponse = (HttpServletResponse) response;
                 httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
                 httpResponse.setHeader("Access-Control-Allow-Origin", HttpContextUtils.getOrigin());
