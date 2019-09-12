@@ -44,15 +44,15 @@ public final class ConstElement {
      * 客户消息类型（双向）：正常的消息，数据结构体使用MessageInfo
      * 通知类消息：没有指定数据结构体，使用字符串即可。
      */
-    //座席更新状态
+    //座席更新状态,座席前端使用
     public static final String eventType_agentStatus = "onAgentStatusEvent";
-    //座席消息类型（双向）
+    //座席消息类型（双向），座席前端端使用
     public static final String eventType_agentMsg = "onAgentMessageEvent";
-    //客户状态及信息更新
+    //客户状态及信息更新，客户前端使用
     public static final String eventType_customerStatus = "onCustomerStatusEvent";
-    //客户消息类型（双向）
+    //客户消息类型（双向），客户前端使用
     public static final String eventType_customerMsg = "onCustomerMessageEvent";
-    //通知类
+    //通知类，客户座席均使用
     public static final String eventType_Notice = "onNoticeEvent";
 
     /**

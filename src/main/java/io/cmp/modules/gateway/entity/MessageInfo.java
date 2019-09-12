@@ -18,22 +18,22 @@ public class MessageInfo {
         this.msgChannel = ConstElement.chanType_webchat;
         this.msgType = ConstElement.msgType_notice;
     }
-    /**
-     * 消息发送方ID
-     * 客户发出消息：该字段值为客户ID，转发后该字段值依然是客户ID，座席收到消息后能通过该字段识别消息是哪个客户发过来的
-     * 座席发出消息：该字段值为座席ID
-     */
-    private String sourceId;
-    //发送方名称
-    private String sourceName;
 
     /**
-     * 接受方ID
-     *
+     * 座席ID和座席姓名
+     * 客户发送消息时，如果已经获取到服务的座席了，填写该信息
+     * 座席发送消息时ID和姓名必填
      */
-    private String targetId;
-    //接收方名称
-    private  String targetName;
+    private String agentId;
+    private String agentName;
+
+    /**
+     * 客户ID和客户姓名
+     * 客户发送消息时ID为必填项，姓名可选项
+     * 座席向客户发送消息时，ID必填，姓名可选项
+     */
+    private String customerId;
+    private String customerName;
 
 
     /**
