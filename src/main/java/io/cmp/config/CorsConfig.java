@@ -22,15 +22,13 @@ public class CorsConfig implements WebMvcConfigurer {
             .maxAge(3600);
     }
 
-    @Value("${com.upload.file.staticAccessPath}")
-    private String staticAccessPath;
     @Value("${com.upload.location}")
     private String location;
+    @Value("${com.upload.file.staticAccessPath}")
+    private String staticAccessPath;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        logger.debug("staticAccessPath="+staticAccessPath);
-        logger.debug("location="+location);
         registry.addResourceHandler(staticAccessPath).addResourceLocations("file:" + location);
     }
 
