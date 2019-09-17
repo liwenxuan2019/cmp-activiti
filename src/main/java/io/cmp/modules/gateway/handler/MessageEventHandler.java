@@ -323,15 +323,16 @@ public class MessageEventHandler {
 
                     if (agentSocketIOClient!=null && agentSocketIOClient.isChannelOpen()) {
                         //通过坐席socket连接对象转发该消息
-                        AgentInfo agentInfo = (AgentInfo) agentStatusMap.get(agentId);
-                        if (agentInfo != null && "1".equals(agentInfo.getAgentStatus())) {
-                            MessageInfo sendData = new MessageInfo();
-                            sendData.setCustomerId(customerId);
-                            sendData.setAgentId(agentId);
-                            sendData.setMsgType(ConstElement.msgType_chat);
-                            sendData.setMsgContent(data.getMsgContent());
-                            agentSocketIOClient.sendEvent(ConstElement.eventType_agentMsg, sendData);
-                        }
+                        /**
+                        MessageInfo sendData = new MessageInfo();
+                        sendData.setCustomerId(customerId);
+                        sendData.setAgentId(agentId);
+                        sendData.setMsgType(ConstElement.msgType_chat);
+                        sendData.setMsgContent(data.getMsgContent());
+                        sendData.setServiceId(data.getServiceId());
+                        agentSocketIOClient.sendEvent(ConstElement.eventType_agentMsg, sendData);
+                         */
+                        agentSocketIOClient.sendEvent(ConstElement.eventType_agentMsg, data);
                     }
                 }
             }
@@ -389,15 +390,19 @@ public class MessageEventHandler {
 
                 if (customerSocketIOClient != null && customerSocketIOClient.isChannelOpen()) {
                     //通过客户socket连接对象转发该消息
-                    CustomerInfo customerInfo = customerStatusMap.get(customerId);
-                    if (customerInfo != null) {
-                        MessageInfo msgInfo = new MessageInfo();
-                        msgInfo.setAgentId(agentId);
-                        msgInfo.setCustomerId(customerId);
-                        msgInfo.setMsgType(ConstElement.msgType_chat);
-                        msgInfo.setMsgContent(data.getMsgContent());
-                        customerSocketIOClient.sendEvent(ConstElement.eventType_customerMsg, msgInfo);
-                    }
+                    /**
+                    MessageInfo msgInfo = new MessageInfo();
+                    msgInfo.setAgentId(agentId);
+                    msgInfo.setAgentNickName(data.getAgentNickName());
+                    msgInfo.setCustomerId(customerId);
+                    msgInfo.setMsgType(ConstElement.msgType_chat);
+                    msgInfo.setMsgContent(data.getMsgContent());
+                    msgInfo.setContentType(data.getContentType());
+                    msgInfo.setServiceId(data.getServiceId());
+                    customerSocketIOClient.sendEvent(ConstElement.eventType_customerMsg, msgInfo);
+                     */
+
+                    customerSocketIOClient.sendEvent(ConstElement.eventType_customerMsg, data);
                 }
             }
             else{
@@ -445,6 +450,7 @@ public class MessageEventHandler {
                 msgInfoAgent.setCustomerId(customerId);
                 msgInfoAgent.setMsgType(ConstElement.msgType_command);
                 msgInfoAgent.setCommandType(ConstElement.commandType_toAgent);
+                msgInfoAgent.setServiceId(UUID.randomUUID().toString().replace("-",""));
                 msgInfoAgent.setMsgContent("为你分配了新的客户,ID="+customerId);
                 SocketIOClient socketAgent = agentToSocketMap.get(allocAgentId);
                 socketAgent.sendEvent(ConstElement.eventType_agentMsg,msgInfoAgent);

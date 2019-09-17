@@ -79,4 +79,11 @@ public final class ConstElement {
     public static final String commandType_toCall = "toCall";
     public static final String commandType_toDisconnect = "toDisconnect";
 
+    /**
+     * 发送方定义
+     */
+    public static final String senderName_customer = "customer";
+    public static final String senderName_agent = "agent";
+    public static final String senderName_robot = "robot";
+
 }

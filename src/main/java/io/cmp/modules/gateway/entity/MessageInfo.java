@@ -20,12 +20,23 @@ public class MessageInfo {
     }
 
     /**
-     * 座席ID和座席姓名
+     * 每次会话由座席端生成，每次发送消息时要带上该值，直到该会话结束
+     */
+    private String serviceId;
+
+    /**
+     * 发送方：客户、人工坐席、机器人
+     */
+    private String senderName;
+
+    /**
+     * 座席ID(坐席代码)和座席姓名、坐席昵称
      * 客户发送消息时，如果已经获取到服务的座席了，填写该信息
      * 座席发送消息时ID和姓名必填
      */
     private String agentId;
     private String agentName;
+    private String agentNickName; //客户端聊天界面显示该名称
 
     /**
      * 客户ID和客户姓名
@@ -62,10 +73,11 @@ public class MessageInfo {
     /**
      * 内容类型（常量定义）
      * 文本类、图片、附件、音频、视频
+     * imr 微博评论
      */
     private String contentType;
 
     //创建时间
-    Date createtime;
+    Date createTime;
 
 }
