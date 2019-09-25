@@ -72,6 +72,24 @@ paths:
           schema:
             $ref: '#/definitions/R'
 
+  /file/download:
+    get:
+      tags:
+        - 文件服务
+      summary: 下载文件
+      produces:
+        - application/octet-stream
+      parameters:
+        - name: filePath
+          description: 文件
+          in: query
+          type: string
+          required: true
+      responses:
+        '200':
+          schema:
+            $ref: file
+
 
 #定义数据模型
 definitions:
