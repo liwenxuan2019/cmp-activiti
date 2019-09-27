@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/file")
-@PropertySource(value = "classpath:application.yml")
+//@PropertySource(value = "classpath:application.yml")
 public class FileUploadController {
     private Logger logger = LoggerFactory.getLogger(getClass());
 

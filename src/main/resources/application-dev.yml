@@ -3,14 +3,14 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/cc2?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
-      username: root
-      password: 123456
+      #url: jdbc:mysql://localhost:3306/cc2?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+      #username: root
+      #password: 123456
 
       #正式环境
-      #url: jdbc:mysql://mysql.sino-hanlin.tech:30002/cc?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
-      #username: callcenter
-      #password: 123456
+      url: jdbc:mysql://mysql.sino-hanlin.tech:30002/cc?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+      username: callcenter
+      password: 123456
       initial-size: 10
       max-active: 100
       min-idle: 10
@@ -65,6 +65,7 @@ httpclient:
 
 # netty-socketio 配置
 socketio:
+  #host: 192.168.10.3
   host: 192.168.31.94
   port: 9092
   bossCount: 1
@@ -76,3 +77,7 @@ socketio:
   pingTimeout: 60000
   upgradeTimeout: 10000
 
+#文件上传路径
+com.upload:
+  location: c:/images/webchat/
+  file.staticAccessPath: images/webchat/**
