@@ -17,7 +17,7 @@ public class CustomerInfo {
     //客户状态 0:离线 1:在线
     String customerStatus;
     //客户优先级 
-    String customerPriority;
+    int customerPriority;
     //ip地址
     String ipAddress;
     //接入时间

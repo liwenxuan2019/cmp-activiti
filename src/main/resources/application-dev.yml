@@ -61,7 +61,7 @@ httpclient:
   maxTotal: 100
   socketTimeout: 10000
   staleConnectionCheckEnabled: true
-  ukfUrl: http://localhost/touukf.html
+  crmAgentInfoSaveUrl: http://localhost:8081/cmp/service/crmagentinfo/save
 
 # netty-socketio 配置
 socketio:
