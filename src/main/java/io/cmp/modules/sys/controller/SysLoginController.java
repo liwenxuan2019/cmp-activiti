@@ -45,8 +45,8 @@ public class SysLoginController{
 	@Autowired
 	private HttpAPIService httpAPIService;
 
-	@Value("${httpclient.ukfUrl}")
-	private String ukfUrl;
+	//@Value("${httpclient.ukfUrl}")
+	//private String ukfUrl;
 
 	/**
 	 * 验证码

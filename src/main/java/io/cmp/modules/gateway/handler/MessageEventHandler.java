@@ -6,21 +6,25 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnDisconnect;
 import com.corundumstudio.socketio.annotation.OnEvent;
+import io.cmp.common.utils.HttpResult;
 import io.cmp.modules.gateway.entity.AgentInfo;
 import io.cmp.modules.gateway.entity.CustomerInfo;
 import io.cmp.modules.gateway.utils.AcdUtils;
 import io.cmp.modules.gateway.utils.ConstElement;
+import io.cmp.modules.sys.service.HttpAPIService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import io.cmp.modules.gateway.entity.MessageInfo;
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 @Slf4j
@@ -29,6 +33,9 @@ public class MessageEventHandler {
 
     @Autowired
     private SocketIOServer socketIoServer;
+
+    @Autowired
+    private HttpAPIService httpAPIService;
 
     //客户端socket连接Map
     public static ConcurrentMap<String, SocketIOClient> customerToSocketMap = new ConcurrentHashMap<>();
@@ -52,6 +59,9 @@ public class MessageEventHandler {
 
     //客户排队列表信息，供分配算法使用
     public static List<String> customerQueue = new LinkedList<String>();
+
+    @Value("${httpclient.crmAgentInfoSaveUrl}")
+    private String crmAgentInfoSaveUrl;
 
     /**
      * 客户端连接的时候触发，相当于向消息网关注册后建立连接。
@@ -152,6 +162,27 @@ public class MessageEventHandler {
 
             //调用分配算法分配
             allocateAgent();
+
+            try {
+			Map<String, Object> map = new HashMap<String, Object>();
+			//map.put("serviceId",user.getUsername());
+			map.put("agentSessionId",socket.getSessionId());
+			map.put("agentId",agentId);
+			map.put("agentCode",agentId);
+			map.put("agentName",agentnName);
+            map.put("authorizationChannel",authorizationChannel);
+            //map.put("agentstatusTime",user.getUsername());
+            map.put("agentStatus","1");
+            map.put("serviceNum","5");
+            map.put("ipAddress",agentIpAddress);
+            map.put("connectTime",connectTime);
+			HttpResult httpResult =httpAPIService.doPost(crmAgentInfoSaveUrl,map);
+			logger.info(httpResult.getBody());
+		}
+		catch (Exception e)
+		{
+			logger.info(e.toString());
+		}
         }
         //非法注册消息，直接关闭socket
         else{
