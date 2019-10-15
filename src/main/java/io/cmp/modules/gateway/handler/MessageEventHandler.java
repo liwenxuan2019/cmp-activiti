@@ -63,6 +63,9 @@ public class MessageEventHandler {
     @Value("${httpclient.crmAgentInfoSaveUrl}")
     private String crmAgentInfoSaveUrl;
 
+    @Value("${httpclient.crmCustomerInfoSaveUrl}")
+    private String crmCustomerInfoSaveUrl;
+
     /**
      * 客户端连接的时候触发，相当于向消息网关注册后建立连接。
      *
@@ -119,6 +122,26 @@ public class MessageEventHandler {
             customerQueue.add(customerId);
             //调用分配算法分配
             allocateAgent();
+            String serviceId = UUID.randomUUID().toString().replaceAll("-", "");
+            try {
+                Map<String, Object> map = new HashMap<String, Object>();
+                //map.put("serviceId",serviceId);
+                map.put("customerSessionId",socket.getSessionId());
+                map.put("customerId",customerId);
+                map.put("customerName",customerName);
+                map.put("accessChannel",accessChannel);
+                map.put("customerStatus","1");
+                map.put("customerPriority","1");
+                map.put("ipAddress",customerIpAddress);
+                map.put("connectTime",connectTime);
+                HttpResult httpResult =httpAPIService.doPost(crmCustomerInfoSaveUrl,map);
+                logger.info(httpResult.getBody());
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                logger.info(e.toString());
+            }
 
         }
         //座席注册
@@ -127,7 +150,7 @@ public class MessageEventHandler {
             //获取坐席工号
             String agentId = socket.getHandshakeData().getSingleUrlParam("agentId");
             //获取坐席名称
-            String agentnName = socket.getHandshakeData().getSingleUrlParam("agentName");
+            String agentName = socket.getHandshakeData().getSingleUrlParam("agentName");
             //获取坐席授权渠道
             String authorizationChannel = socket.getHandshakeData().getSingleUrlParam("authorizationChannel");
             //获取坐席ip地址
@@ -137,7 +160,7 @@ public class MessageEventHandler {
 
             AgentInfo agentInfo = new AgentInfo();
             agentInfo.setAgentId(agentId);
-            agentInfo.setAgentName(agentnName);
+            agentInfo.setAgentName(agentName);
             agentInfo.setAuthorizationChannel(authorizationChannel);
             agentInfo.setAgentStatus("1");
             agentInfo.setServiceNum(5);
@@ -158,20 +181,20 @@ public class MessageEventHandler {
             msgInfo.setMsgContent("座席端已经建立连接，开始服务");
             //回发消息
             socket.sendEvent(ConstElement.eventType_agentMsg, msgInfo);
-            logger.info("坐席端已连接 agentId=" + agentId+",agentnName=" + agentnName+",坐席授权渠道=" + authorizationChannel+",坐席ip地址=" + agentIpAddress+",接入时间="+connectTime);
+            logger.info("坐席端已连接 agentId=" + agentId+",agentnName=" + agentName+",坐席授权渠道=" + authorizationChannel+",坐席ip地址=" + agentIpAddress+",接入时间="+connectTime);
 
             //调用分配算法分配
             allocateAgent();
-
+            String serviceId = UUID.randomUUID().toString().replaceAll("-", "");
             try {
 			Map<String, Object> map = new HashMap<String, Object>();
-			//map.put("serviceId",user.getUsername());
+			map.put("serviceId",serviceId);
 			map.put("agentSessionId",socket.getSessionId());
 			map.put("agentId",agentId);
 			map.put("agentCode",agentId);
-			map.put("agentName",agentnName);
+			map.put("agentName",agentName);
             map.put("authorizationChannel",authorizationChannel);
-            //map.put("agentstatusTime",user.getUsername());
+            map.put("agentstatusTime",new Date());
             map.put("agentStatus","1");
             map.put("serviceNum","5");
             map.put("ipAddress",agentIpAddress);
@@ -181,6 +204,7 @@ public class MessageEventHandler {
 		}
 		catch (Exception e)
 		{
+            e.printStackTrace();
 			logger.info(e.toString());
 		}
         }
