@@ -1,5 +1,6 @@
 package io.cmp.modules.sys.service;
 
+import com.alibaba.fastjson.JSONObject;
 import io.cmp.common.utils.HttpResult;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -7,6 +8,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -85,6 +88,7 @@ public class HttpAPIService {
      * @throws Exception
      */
     public HttpResult doPost(String url, Map<String, Object> map) throws Exception {
+
         // 声明httpPost请求
         HttpPost httpPost = new HttpPost(url);
         // 加入配置信息
@@ -92,7 +96,15 @@ public class HttpAPIService {
 
         // 判断map是否为空，不为空则进行遍历，封装from表单对象
         if (map != null) {
-            List<NameValuePair> list = new ArrayList<NameValuePair>();
+            String jsonString = JSONObject.toJSONString(map);
+            httpPost.setHeader("Content-Type", "application/json;charset=UTF-8");//表示客户端发送给服务器端的数据格式
+            //httpPost.setHeader("Accept", "*/*");这样也ok,只不过服务端返回的数据不一定为json
+            httpPost.setHeader("Accept", "application/json");                    //表示服务端接口要返回给客户端的数据格式，
+            StringEntity entity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+            httpPost.setEntity(entity);
+
+
+         /*   List<NameValuePair> list = new ArrayList<NameValuePair>();
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 list.add(new BasicNameValuePair(entry.getKey(), entry.getValue().toString()));
             }
@@ -100,7 +112,7 @@ public class HttpAPIService {
             UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(list, "UTF-8");
 
             // 把表单放到post里
-            httpPost.setEntity(urlEncodedFormEntity);
+            httpPost.setEntity(urlEncodedFormEntity);*/
         }
 
         // 发起请求
