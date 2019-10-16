@@ -3,14 +3,14 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       driver-class-name: com.mysql.jdbc.Driver
-      #url: jdbc:mysql://localhost:3306/cc2?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
-      #username: root
-      #password: 123456
+      url: jdbc:mysql://localhost:3306/cc2?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+      username: root
+      password: 123456
 
       #正式环境
-      url: jdbc:mysql://mysql.sino-hanlin.tech:30002/cc?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
-      username: callcenter
-      password: 123456
+      #url: jdbc:mysql://mysql.sino-hanlin.tech:30002/cc?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+      #username: callcenter
+      #password: 123456
       initial-size: 10
       max-active: 100
       min-idle: 10
@@ -66,13 +66,14 @@ httpclient:
   crmAgentInfoSaveUrl: http://localhost:8081/cmp/service/crmagentinfo/save
   crmAgentInfoUpdateUrl: http://localhost:8081/cmp/service/crmagentinfo/update
   crmmessageinfoSaveUrl: http://localhost:8081/cmp/service/crmmessageinfo/save
+  crmagentcustomerserviceSaveUrl: http://localhost:8081/cmp/service/crmagentcustomerservice/save
 
 
 # netty-socketio 配置
 socketio:
-  host: 172.16.204.9
+  #host: 172.16.204.9
   #host: 192.168.31.94
-  #host: 172.17.56.167
+  host: 172.17.56.167
   port: 9092
   bossCount: 1
   workCount: 100

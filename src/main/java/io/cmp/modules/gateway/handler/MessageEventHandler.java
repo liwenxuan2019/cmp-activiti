@@ -75,6 +75,9 @@ public class MessageEventHandler {
     @Value("${httpclient.crmmessageinfoSaveUrl}")
     private String crmmessageinfoSaveUrl;
 
+    @Value("${httpclient.crmagentcustomerserviceSaveUrl}")
+    private String crmagentcustomerserviceSaveUrl;
+
     /**
      * 客户端连接的时候触发，相当于向消息网关注册后建立连接。
      *
@@ -623,6 +626,21 @@ public class MessageEventHandler {
                 socketCustomer.sendEvent(ConstElement.eventType_customerMsg,msgInfoCus);
 
                 it.remove();
+
+                try {
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("serviceId",serviceId);
+                    map.put("agentCode",allocAgentId);
+                    map.put("customerId",customerId);
+                    map.put("createTime",new Date());
+                    HttpResult httpResult =httpAPIService.doPost(crmagentcustomerserviceSaveUrl,map);
+                    logger.info(httpResult.getBody());
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    logger.info(e.toString());
+                }
             }
             else {
                 logger.info("没有空闲坐席");
