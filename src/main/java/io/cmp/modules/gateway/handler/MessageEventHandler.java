@@ -401,6 +401,7 @@ public class MessageEventHandler {
             //通过源ID查询Map获取坐席ID
             if(customerId!=null&& StringUtils.isNotBlank(customerId)) {
                 String agentId = customerToAgentMap.get(customerId);
+                logger.info("通过customerId查询Map获取坐席ID agentId="+agentId);
 
                 //通过坐席ID查询到坐席的socket连接对象
                 if(agentId != null && StringUtils.isNotBlank(agentId)){
@@ -423,7 +424,7 @@ public class MessageEventHandler {
                             Map<String, Object> map = new HashMap<String, Object>();
                             map.put("serviceId",serviceId);
                             map.put("senderName",senderName);
-                            map.put("agentId",agentId);
+                            map.put("agentCode",agentId);
                             map.put("customerId",customerId);
                             map.put("customerName",customerName);
                             map.put("msgType",msgType);
@@ -540,7 +541,7 @@ public class MessageEventHandler {
                         Map<String, Object> map = new HashMap<String, Object>();
                         map.put("serviceId",serviceId);
                         map.put("senderName",senderName);
-                        map.put("agentId",agentId);
+                        map.put("agentCode",agentId);
                         map.put("agentName",agentName);
                         map.put("customerId",customerId);
                         map.put("msgType",msgType);
