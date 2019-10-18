@@ -67,6 +67,7 @@ httpclient:
   crmAgentInfoUpdateUrl: http://localhost:8081/cmp/service/crmagentinfo/update
   crmmessageinfoSaveUrl: http://localhost:8081/cmp/service/crmmessageinfo/save
   crmagentcustomerserviceSaveUrl: http://localhost:8081/cmp/service/crmagentcustomerservice/save
+  nlpSaaSQAUrl: http://125.91.117.72:8082/NLP4SaaSQA_V2/NLPAnalysis
 
 
 # netty-socketio 配置

@@ -145,7 +145,7 @@ public class MessageEventHandler {
                 map.put("customerPriority","1");
                 map.put("ipAddress",customerIpAddress);
                 map.put("connectTime",connectTime);
-                HttpResult httpResult =httpAPIService.doPost(crmCustomerInfoSaveUrl,map);
+                HttpResult httpResult =httpAPIService.doPostJson(crmCustomerInfoSaveUrl,map);
                 logger.info(httpResult.getBody());
             }
             catch (Exception e)
@@ -209,7 +209,7 @@ public class MessageEventHandler {
             map.put("serviceNum","5");
             map.put("ipAddress",agentIpAddress);
             map.put("connectTime",connectTime);
-			HttpResult httpResult =httpAPIService.doPost(crmAgentInfoSaveUrl,map);
+			HttpResult httpResult =httpAPIService.doPostJson(crmAgentInfoSaveUrl,map);
 			logger.info(httpResult.getBody());
 		    }
 		    catch (Exception e)
@@ -368,7 +368,7 @@ public class MessageEventHandler {
             map.put("customerId",customerId);
             map.put("customerStatus",customerStatus);
 
-            HttpResult httpResult =httpAPIService.doPost(crmCustomerInfoUpdateUrl,map);
+            HttpResult httpResult =httpAPIService.doPostJson(crmCustomerInfoUpdateUrl,map);
             logger.info(httpResult.getBody());
         }
         catch (Exception e)
@@ -435,7 +435,7 @@ public class MessageEventHandler {
                             map.put("contentType",contentType);
                             map.put("msgContent",msgContent);
                             map.put("createTime",new Date());
-                            HttpResult httpResult =httpAPIService.doPost(crmmessageinfoSaveUrl,map);
+                            HttpResult httpResult =httpAPIService.doPostJson(crmmessageinfoSaveUrl,map);
                             logger.info(httpResult.getBody());
                         }
                         catch (Exception e)
@@ -483,7 +483,7 @@ public class MessageEventHandler {
             map.put("agentId",agentId);
             map.put("agentStatus",agentStatus);
 
-            HttpResult httpResult =httpAPIService.doPost(crmAgentInfoUpdateUrl,map);
+            HttpResult httpResult =httpAPIService.doPostJson(crmAgentInfoUpdateUrl,map);
             logger.info(httpResult.getBody());
         }
         catch (Exception e)
@@ -552,7 +552,7 @@ public class MessageEventHandler {
                         map.put("contentType",contentType);
                         map.put("msgContent",msgContent);
                         map.put("createTime",new Date());
-                        HttpResult httpResult =httpAPIService.doPost(crmmessageinfoSaveUrl,map);
+                        HttpResult httpResult =httpAPIService.doPostJson(crmmessageinfoSaveUrl,map);
                         logger.info(httpResult.getBody());
                     }
                     catch (Exception e)
@@ -633,7 +633,7 @@ public class MessageEventHandler {
                     map.put("agentCode",allocAgentId);
                     map.put("customerId",customerId);
                     map.put("createTime",new Date());
-                    HttpResult httpResult =httpAPIService.doPost(crmagentcustomerserviceSaveUrl,map);
+                    HttpResult httpResult =httpAPIService.doPostJson(crmagentcustomerserviceSaveUrl,map);
                     logger.info(httpResult.getBody());
                 }
                 catch (Exception e)

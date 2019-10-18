@@ -80,6 +80,17 @@ public class HttpAPIService {
     }
 
     /**
+     * 不带参数post请求
+     *
+     * @param url
+     * @return
+     * @throws Exception
+     */
+    public HttpResult doPost(String url) throws Exception {
+        return this.doPost(url, null);
+    }
+
+    /**
      * 带参数的post请求
      *
      * @param url
@@ -88,6 +99,41 @@ public class HttpAPIService {
      * @throws Exception
      */
     public HttpResult doPost(String url, Map<String, Object> map) throws Exception {
+
+        // 声明httpPost请求
+        HttpPost httpPost = new HttpPost(url);
+        // 加入配置信息
+        httpPost.setConfig(config);
+
+        // 判断map是否为空，不为空则进行遍历，封装from表单对象
+        if (map != null) {
+           List<NameValuePair> list = new ArrayList<NameValuePair>();
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                list.add(new BasicNameValuePair(entry.getKey(), entry.getValue().toString()));
+            }
+            // 构造from表单对象
+            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(list, "UTF-8");
+
+            // 把表单放到post里
+            httpPost.setEntity(urlEncodedFormEntity);
+        }
+
+        // 发起请求
+        CloseableHttpResponse response = this.httpClient.execute(httpPost);
+
+        return new HttpResult(response.getStatusLine().getStatusCode(), EntityUtils.toString(
+                response.getEntity(), "UTF-8"));
+    }
+
+    /**
+     * 带参数的post请求
+     *
+     * @param url
+     * @param map
+     * @return
+     * @throws Exception
+     */
+    public HttpResult doPostJson(String url, Map<String, Object> map) throws Exception {
 
         // 声明httpPost请求
         HttpPost httpPost = new HttpPost(url);
@@ -122,15 +168,8 @@ public class HttpAPIService {
                 response.getEntity(), "UTF-8"));
     }
 
-    /**
-     * 不带参数post请求
-     *
-     * @param url
-     * @return
-     * @throws Exception
-     */
-    public HttpResult doPost(String url) throws Exception {
-        return this.doPost(url, null);
-    }
+
+
+
 
 }
