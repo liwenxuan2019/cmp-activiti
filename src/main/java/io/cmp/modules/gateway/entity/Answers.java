@@ -21,6 +21,6 @@ public class Answers {
         private String answerType;
         private String code;
         private List<String> menuItemsIDs;
-        private List<String> date;
+        private List<Date> date;
 
 }

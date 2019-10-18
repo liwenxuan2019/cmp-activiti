@@ -19,6 +19,6 @@ public class AnswerContent {
     private int errCode;
     private List<Answers> answers;
     private int answersCount;
-    private String startTime;
-    private String endTime;
+    private Date startTime;
+    private Date endTime;
 }
