@@ -30,7 +30,6 @@ public class NlpUtils {
 
     public AnswerContent nlpSaaSQA(String serviceId, String msgContent, String Channel, String City,String Business)
     {
-        logger.info("nlpSaaSQAUrl="+nlpSaaSQAUrl);
 
         AnswerContent answerContent=null;
         try {
