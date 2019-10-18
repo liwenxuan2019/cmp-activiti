@@ -22,6 +22,6 @@ public class NlpTest {
     @Test
     public void nlpSaaSQA() {
         AnswerContent answerContent=nlpUtils.nlpSaaSQA("78fa31aaf74e4996893ba3fde1ae03a5","你好","YY","盐田区政府","TelecomRobot_YT");
-        logger.info(JSON.toJSONString(answerContent));
+        logger.info("answerContent="+JSON.toJSONString(answerContent));
     }
 }
