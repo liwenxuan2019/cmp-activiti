@@ -7,10 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class NlpUtils {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -18,11 +20,18 @@ public class NlpUtils {
     @Value("${httpclient.nlpSaaSQAUrl}")
     private String nlpSaaSQAUrl;
 
+    private static HttpAPIService httpAPIService;
+
     @Autowired
-    private HttpAPIService httpAPIService;
+    public void setHttpAPIService(HttpAPIService httpAPIService)
+    {
+        NlpUtils.httpAPIService=httpAPIService;
+    }
 
     public Nlp nlpSaaSQA(String serviceId, String msgContent, String Channel, String City,String Business)
     {
+        logger.info("nlpSaaSQAUrl="+nlpSaaSQAUrl);
+
         Nlp nlp=null;
         try {
             Map<String, Object> map = new HashMap<String, Object>();

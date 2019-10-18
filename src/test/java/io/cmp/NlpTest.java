@@ -16,9 +16,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class NlpTest {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Autowired
+    private  NlpUtils nlpUtils;
+
     @Test
     public void nlpSaaSQA() {
-        NlpUtils nlpUtils = new NlpUtils();
         Nlp nlp=nlpUtils.nlpSaaSQA("78fa31aaf74e4996893ba3fde1ae03a5","你好","YY","盐田区政府","TelecomRobot_YT");
         logger.info(JSON.toJSONString(nlp));
     }

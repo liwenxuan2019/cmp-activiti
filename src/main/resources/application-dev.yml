@@ -73,8 +73,8 @@ httpclient:
 # netty-socketio 配置
 socketio:
   #host: 172.16.204.9
-  #host: 192.168.31.94
-  host: 172.17.56.167
+  host: 192.168.31.94
+  #host: 172.17.56.167
   port: 9092
   bossCount: 1
   workCount: 100
