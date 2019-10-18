@@ -21,48 +21,6 @@ public class Answers {
         private String answerType;
         private String code;
         private List<String> menuItemsIDs;
-        private Date date;
-
-        public void setAnswerPat(String answerPat) {
-            this.answerPat = answerPat;
-        }
-        public String getAnswerPat() {
-            return answerPat;
-        }
-
-        public void setMenuItems(List<String> menuItems) {
-            this.menuItems = menuItems;
-        }
-        public List<String> getMenuItems() {
-            return menuItems;
-        }
-
-        public void setAnswerType(String answerType) {
-            this.answerType = answerType;
-        }
-        public String getAnswerType() {
-            return answerType;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-        public String getCode() {
-            return code;
-        }
-
-        public void setMenuItemsIDs(List<String> menuItemsIDs) {
-            this.menuItemsIDs = menuItemsIDs;
-        }
-        public List<String> getMenuItemsIDs() {
-            return menuItemsIDs;
-        }
-
-        public void setDate(Date date) {
-            this.date = date;
-        }
-        public Date getDate() {
-            return date;
-        }
+        private List<String> date;
 
 }

@@ -19,41 +19,6 @@ public class AnswerContent {
     private int errCode;
     private List<Answers> answers;
     private int answersCount;
-    private Date startTime;
-    private Date endTime;
-
-        public void setStartTime(Date startTime) {
-            this.startTime = startTime;
-        }
-        public Date getStartTime() {
-            return startTime;
-        }
-
-        public void setErrCode(int errCode) {
-            this.errCode = errCode;
-        }
-        public int getErrCode() {
-            return errCode;
-        }
-
-        public void setAnswers(List<Answers> answers) {
-            this.answers = answers;
-        }
-        public List<Answers> getAnswers() {
-            return answers;
-        }
-
-        public void setAnswersCount(int answersCount) {
-            this.answersCount = answersCount;
-        }
-        public int getAnswersCount() {
-            return answersCount;
-        }
-
-        public void setEndTime(Date endTime) {
-            this.endTime = endTime;
-        }
-        public Date getEndTime() {
-            return endTime;
-        }
+    private String startTime;
+    private String endTime;
 }

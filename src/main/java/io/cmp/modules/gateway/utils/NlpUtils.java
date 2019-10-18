@@ -1,7 +1,7 @@
 package io.cmp.modules.gateway.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import io.cmp.modules.gateway.entity.Nlp;
+import io.cmp.modules.gateway.entity.AnswerContent;
 import io.cmp.modules.sys.service.HttpAPIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +28,11 @@ public class NlpUtils {
         NlpUtils.httpAPIService=httpAPIService;
     }
 
-    public Nlp nlpSaaSQA(String serviceId, String msgContent, String Channel, String City,String Business)
+    public AnswerContent nlpSaaSQA(String serviceId, String msgContent, String Channel, String City,String Business)
     {
         logger.info("nlpSaaSQAUrl="+nlpSaaSQAUrl);
 
-        Nlp nlp=null;
+        AnswerContent answerContent=null;
         try {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("UserID",serviceId);
@@ -42,13 +42,13 @@ public class NlpUtils {
             map.put("Business",Business);
             String httpResult =httpAPIService.doGet(nlpSaaSQAUrl,map);
             logger.info("httpResult="+httpResult);
-            nlp= JSONObject.parseObject(httpResult,Nlp.class);
+            answerContent= JSONObject.parseObject(httpResult,AnswerContent.class);
         }
         catch (Exception e)
         {
             e.printStackTrace();
             logger.info(e.toString());
         }
-        return nlp;
+        return answerContent;
     }
 }
