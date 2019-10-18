@@ -15,7 +15,7 @@ import lombok.Data;
  * @website http://www.bejson.com/java2pojo/
  */
 @Data
-public class Nlp {
+public class AnswerContent {
     private int errCode;
     private List<Answers> answers;
     private int answersCount;

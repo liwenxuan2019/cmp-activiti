@@ -25,6 +25,11 @@ public class MessageInfo {
     private String serviceId;
 
     /**
+     * 服务模式：机器人Robot;人工Agent;
+     */
+    private String serviceMode;
+
+    /**
      * 发送方：客户、人工坐席、机器人
      */
     private String senderName;
@@ -50,7 +55,7 @@ public class MessageInfo {
     /**
      * 定义消息类型(从常量中选择，不要自行写)
      * 通知类（例如显示客户正在输入等等，不需要后续处理）
-     * 命令类（需要进行相应的操作，例如断开与客户的链接、转给机器人、转给人工、转电话等）
+     * 命令     * 命令类（需要进行相应的操作，例如断开与客户的链接、转给机器人、转给人工、转电话等）类（需要进行相应的操作，例如断开与客户的链接、转给机器人、转给人工、转电话等）
      * 聊天类（需要转发）
      */
     private String msgType;
@@ -69,6 +74,9 @@ public class MessageInfo {
 
     //消息内容
     private String msgContent;
+
+    //加强型回复消息内容：目前为机器人使用，以后会公用这个。20191018
+    private AnswerContent answerContent;
 
     /**
      * 内容类型（常量定义）

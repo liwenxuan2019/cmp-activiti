@@ -86,4 +86,10 @@ public final class ConstElement {
     public static final String senderName_agent = "agent";
     public static final String senderName_robot = "robot";
 
+    /**
+     * 服务模式定义
+     */
+    public static final String serviceMode_robot = "sm_robot"; //机器人
+    public static final String serviceMode_agent = "sm_agent"; //人工
+
 }

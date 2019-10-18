@@ -308,7 +308,7 @@ public class MessageEventHandler {
                 }
             }
 
-            // 4、删除并 获取该服务该客户的座席
+            // 5、删除并获取该服务该客户的座席
             String strAgentID = customerToAgentMap.remove(findCustomer);
             logger.info("找到为该客户服务的座席，strAgentID="+strAgentID);
             if(null != strAgentID && StringUtils.isNotBlank(strAgentID)) {
