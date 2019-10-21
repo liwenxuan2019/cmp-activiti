@@ -29,20 +29,22 @@ public final class ConstElement {
      * 命令类（需要进行相应的操作，例如断开与客户的链接）
      * 聊天类（需要转发）
      */
-    //通知类
+    //通知类：在聊天窗口用灰色底色显示
     public static final String msgType_notice = "notice";
-    //命令类
+    //命令类：收到后需要做相应的操作
     public static final String msgType_command = "command";
-    //交互聊天类
+    //交互聊天类：正常聊天内容
     public static final String msgType_chat = "chat";
 
     /**
      * 定义Event类型：在前端和后端收到消息时的事件类别定义
+     * *****原则上按照传输的数据结构来定义事件类型，但为了程序处理方便，同一个结构体会根据消息类型也会拆分多个事件类型处理*****
      * 座席更新状态：服务端收到这个消息后在该消息的函数内处理更新座席状态，数据结构体使用AgentInfo
      * 座席消息类型（双向）：正常的消息，数据结构体使用MessageInfo
      * 客户状态更新类型：客户端的状态如果发生改变，使用该事件定义，数据结构体使用CustomerInfo
      * 客户消息类型（双向）：正常的消息，数据结构体使用MessageInfo
-     * 通知类消息：没有指定数据结构体，使用字符串即可。
+     * 通知类消息：结构体使用MessageInfo。
+     * 调试提示类信息：无结构，直接发送字符串。
      */
     //座席更新状态,座席前端使用
     public static final String eventType_agentStatus = "onAgentStatusEvent";
@@ -52,8 +54,10 @@ public final class ConstElement {
     public static final String eventType_customerStatus = "onCustomerStatusEvent";
     //客户消息类型（双向），客户前端使用
     public static final String eventType_customerMsg = "onCustomerMessageEvent";
-    //通知类，客户座席均使用
-    public static final String eventType_Notice = "onNoticeEvent";
+    //通知类消息
+    public static final String eventType_notice = "onNoticeMessageEvent";
+    //调试提示消息
+    public static final String eventType_info = "onInfoMessageEvent";
 
     /**
      * 定义内容类型固定值
@@ -82,14 +86,15 @@ public final class ConstElement {
     /**
      * 发送方定义
      */
-    public static final String senderName_customer = "customer";
-    public static final String senderName_agent = "agent";
-    public static final String senderName_robot = "robot";
+    public static final String senderName_customer = "customer"; //客户端发送的消息
+    public static final String senderName_agent = "agent"; //人工座席发送的消息
+    public static final String senderName_chatRobot = "chatRobot"; //机器人发送的消息
+    public static final String senderName_server = "server"; //服务器本身发送的消息
 
     /**
      * 服务模式定义
      */
-    public static final String serviceMode_robot = "sm_robot"; //机器人
-    public static final String serviceMode_agent = "sm_agent"; //人工
+    public static final String serviceMode_chatRobot = "chatRobot"; //聊天机器人
+    public static final String serviceMode_person = "person"; //人工
 
 }

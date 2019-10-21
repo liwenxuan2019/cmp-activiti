@@ -17,6 +17,8 @@ public class MessageInfo {
         this.contentType = ConstElement.contentType_text;
         this.msgChannel = ConstElement.chanType_webchat;
         this.msgType = ConstElement.msgType_notice;
+        this.senderName = ConstElement.senderName_server;
+        this.serviceMode = ConstElement.serviceMode_chatRobot;
     }
 
     /**
@@ -71,6 +73,9 @@ public class MessageInfo {
      * 微信原生、微信网页、网页聊天、微博、QQ
      */
     private String msgChannel;
+
+    //提示消息内容
+    private String noticeContent;
 
     //消息内容
     private String msgContent;
