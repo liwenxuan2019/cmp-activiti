@@ -14,11 +14,11 @@ public class MessageInfo {
      * 初始化默认值
      */
     public MessageInfo(){
-        this.contentType = ConstElement.contentType_text;
-        this.msgChannel = ConstElement.chanType_webchat;
-        this.msgType = ConstElement.msgType_notice;
-        this.senderName = ConstElement.senderName_server;
-        this.serviceMode = ConstElement.serviceMode_chatRobot;
+        //this.contentType = ConstElement.contentType_text;
+        //this.msgChannel = ConstElement.chanType_webchat;
+        //this.msgType = ConstElement.msgType_notice;
+        //this.senderName = ConstElement.senderName_server;
+        //this.serviceMode = ConstElement.serviceMode_chatRobot;
     }
 
     /**
