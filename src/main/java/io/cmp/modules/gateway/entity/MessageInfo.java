@@ -71,6 +71,7 @@ public class MessageInfo {
     /**
      * 消息所属通道（常量定义）
      * 微信原生、微信网页、网页聊天、微博、QQ
+     * chanType_******
      */
     private String msgChannel;
 

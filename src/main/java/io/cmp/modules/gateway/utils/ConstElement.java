@@ -9,19 +9,19 @@ public final class ConstElement {
 
     //定义渠道类型：微信原生、微信网页、网页聊天、微博、QQ
     //微信原生
-    public static final String chanType_weixin = "weixin";
+    public static final String channel_weixin = "weixin";
     //微信web渠道
-    public static final String chanType_weixin_web = "weixin_web";
+    public static final String channel_weixin_web = "weixin_web";
     //web聊天
-    public static final String chanType_webchat = "webchat";
+    public static final String channel_webchat = "webchat";
     //微博
-    public static final String chanType_weibo = "weibo";
+    public static final String channel_weibo = "weibo";
     //QQ渠道
-    public static final String chanType_qq = "qq";
+    public static final String channel_qq = "qq";
     //sms
-    public static final String chanType_sms = "sms";
+    public static final String channel_sms = "sms";
     //email
-    public static final String chanType_email = "email";
+    public static final String channel_email = "email";
 
     /**
      * 定义消息类型

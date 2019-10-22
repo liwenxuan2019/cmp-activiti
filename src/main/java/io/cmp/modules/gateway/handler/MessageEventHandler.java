@@ -145,7 +145,7 @@ public class MessageEventHandler {
             //获取服务模式
             String serviceMode = socket.getHandshakeData().getSingleUrlParam("serviceMode");
             MessageInfo noticeInfo = new MessageInfo();
-            if(StringUtils.isNotBlank(serviceMode) && ConstElement.serviceMode_person.equals(serviceMode)){
+            if(null != serviceMode && ConstElement.serviceMode_person.equals(serviceMode)){
                 noticeInfo.setMsgType(ConstElement.msgType_notice);
                 noticeInfo.setSenderName(ConstElement.senderName_server);
                 noticeInfo.setServiceMode(ConstElement.serviceMode_person);
@@ -211,16 +211,21 @@ public class MessageEventHandler {
             agentInfo.setConnectTime(connectTime);
 
             //存储坐席SocketIOClient，用于发送消息
+            logger.info("onConnect 座席注册：agentToSocketMap = " + agentToSocketMap.toString());
             agentToSocketMap.put(agentId, socket);
             //存储坐席状态对象
+            logger.info("onConnect 座席注册：agentStatusMap = " + agentStatusMap.toString());
             agentStatusMap.put(agentId,agentInfo);
             //存储socket对座席id
+            logger.info("onConnect 座席注册：socketSessionToAgentMap = " + socketSessionToAgentMap.toString());
             String socketAgentKey = socket.getSessionId() + socket.getRemoteAddress().toString();
             socketSessionToAgentMap.put(socketAgentKey,agentId);
+            logger.info("onConnect 座席注册：socketSessionToAgentMap加入后 = " + socketSessionToAgentMap.toString());
 
             //回发消息,通过定义好的方式进行
             MessageInfo msgInfo = new MessageInfo();
             msgInfo.setMsgType(ConstElement.msgType_notice);
+            msgInfo.setSenderName(ConstElement.senderName_server);
             msgInfo.setNoticeContent("座席端已经建立连接，开始服务");
             //回发消息
             socket.sendEvent(ConstElement.eventType_notice, msgInfo);
@@ -272,18 +277,19 @@ public class MessageEventHandler {
         String socketKey = socket.getSessionId() + socket.getRemoteAddress().toString();
         logger.info("socketKey is {}", socketKey);
 
-        //通过socket对象找到是哪个socket断开，需要找到客户id或者座席id
-        //先查找座席map
-        String findAgent = socketSessionToAgentMap.get(socketKey);
-        String findCustomer = socketSessionToCustomerMap.get(socketKey);
+        /**
+         * 无论如何这个socke删除了,socket to agent 和 customer的map表中的键值对是一定要删除的；
+         * 通过remove方法删除并返回对应的值，是最优处理方法
+         */
+        String findAgent = socketSessionToAgentMap.remove(socketKey);
+        String findCustomer = socketSessionToCustomerMap.remove(socketKey);
 
         /**
          * 如果是座席socket断开，有两种情况，座席签出，或者座席意外断线。
          * 这两种情况均需要对座席是否正在服务客户做出判断，并做相应的处理。
          */
+        socketSessionToAgentMap.remove(socketKey);
         if(null != findAgent && StringUtils.isNotBlank(findAgent)){
-            //删除socket==>座席 map
-            socketSessionToAgentMap.remove(socketKey);
             logger.info("onDisconnect 座席端断开，strFindAgent="+findAgent);
             //删除座席==>socket Map
             agentToSocketMap.remove(findAgent);
@@ -299,6 +305,8 @@ public class MessageEventHandler {
                 //2、给这些客户发送通知消息、删除客户与座席对应信息、重新为这些客户分配座席
                 for(String customerId : customerArray){
                     if(null != customerId && StringUtils.isNotBlank(customerId)) {
+                        //删除客户与座席对应信息
+                        customerToAgentMap.remove(customerId);
                         //查找客户socket准备发消息
                         SocketIOClient socketCustomer = customerToSocketMap.get(customerId);
                         if(null != socketCustomer){
@@ -306,18 +314,15 @@ public class MessageEventHandler {
                             msgInfo.setMsgType(ConstElement.msgType_notice);
                             msgInfo.setCustomerId(customerId);
                             msgInfo.setSenderName(ConstElement.senderName_server);
-                            msgInfo.setNoticeContent("请稍后，正在为您重新分配座席");
+                            msgInfo.setNoticeContent(getAllocateNoticeMessage());
                             msgInfo.setServiceMode(ConstElement.serviceMode_person);
                             socketCustomer.sendEvent(ConstElement.eventType_notice, msgInfo);
+
+                            //添加到排队
+                            addCustomerQueue(customerId);
+                            //触发分配座席
+                            allocateAgent();
                         }
-
-                        //删除客户与座席对应信息
-                        customerToAgentMap.remove(customerId);
-
-                        //添加到排队
-                        customerQueue.add(customerId);
-                        //触发分配座席
-                        allocateAgent();
                     }
                 }
             }
@@ -327,9 +332,6 @@ public class MessageEventHandler {
          * 如果是客户端断开，可能是客户主动关闭，或者网络中断，需要做相应的处理
          */
         if(null != findCustomer && StringUtils.isNotBlank(findCustomer)) {
-
-            // 1、删除socket与客户对应表
-            socketSessionToCustomerMap.remove(socketKey);
             logger.info("onDisconnect 客户端断开，strFindCustomer="+findCustomer);
             // 2、删除客户对应socket Map
             customerToSocketMap.remove(findCustomer);
@@ -337,12 +339,18 @@ public class MessageEventHandler {
             customerStatusMap.remove(findCustomer);
 
             // 4、如果客户等待队列里有该客户，删除他，因为他断开了。
+            logger.info("onDisconnect 客户断开 customerQueue = " + customerQueue.toString());
+            customerQueue.remove(findCustomer);
+            /**
             for(int i=0; i<customerQueue.size(); i++){
-                if(customerQueue.get(i) == findCustomer){
+                String strQueue = customerQueue.get(i);
+                if(findCustomer.equals(strQueue)){
                     customerQueue.remove(i);
                     i--;
                 }
             }
+             */
+            logger.info("onDisconnect 客户断开 customerQueue 处理后 = " + customerQueue.toString());
 
             // 5、删除并获取该服务该客户的座席，如果是机器人座席，依然执行这一步，会找不到人工座席，不影响程序执行。
             String strAgentID = customerToAgentMap.remove(findCustomer);
@@ -356,7 +364,7 @@ public class MessageEventHandler {
                     msgInfo.setSenderName(ConstElement.senderName_server);
                     msgInfo.setAgentId(strAgentID);
                     msgInfo.setCustomerId(findCustomer);
-                    msgInfo.setNoticeContent("客户已经断开");
+                    msgInfo.setNoticeContent("客户已经断开……");
                     socketAgent.sendEvent(ConstElement.eventType_notice, msgInfo);
 
                     //客户已经断开，该坐席的当前服务结束，释放一个服务客户资源，需要处理后续内容，与分配相关。
@@ -381,6 +389,68 @@ public class MessageEventHandler {
         }
 
         return customerArray;
+    }
+
+    private String getAllocateNoticeMessage(){
+        int queueSize = customerQueue.size();
+
+        String noticeMessage = "正在为您分配人工座席，目前有" + String.valueOf(queueSize) + "个客户等待，";
+        if(queueSize <= 1){
+            noticeMessage = noticeMessage + "将很快为您接通，请稍后……";
+        }
+        else{
+            noticeMessage = noticeMessage + "预计等待" + String.valueOf(queueSize*1.5) + "分钟，请您耐心等待，谢谢……";
+        }
+
+        return noticeMessage;
+    }
+
+    /**
+     * 同socket和Messageinfo的数据进行分配座席
+     * 该data对象中的customerId值不能为空
+     * @param socket
+     * @param data
+     */
+    private void toAllocateBySocketAndData(SocketIOClient socket, MessageInfo data){
+        if(null == socket || null == data){
+            return;
+        }
+
+        // 1、获取客户id
+        String customerId = data.getCustomerId();
+        if(null == customerId || StringUtils.isBlank(customerId)){
+            return;
+        }
+
+        // 2、添加到排队队列
+        addCustomerQueue(customerId);
+
+        // 3、发送提示消息
+        data.setSenderName(ConstElement.senderName_server);
+        data.setNoticeContent(getAllocateNoticeMessage());
+        data.setMsgType(ConstElement.msgType_notice);
+        socket.sendEvent(ConstElement.eventType_notice,data);
+
+        // 4、分配人工座席
+        allocateAgent();
+    }
+
+    private boolean isRelatedWithAgentBetweenCustomer(String agentId, String customerId){
+        if(null == agentId || StringUtils.isBlank(agentId) || null == customerId || StringUtils.isBlank(customerId)){
+            return false;
+        }
+
+        //判断座席和客户是否有关联关系
+        String findAgentId = customerToAgentMap.get(customerId);
+        if(null == findAgentId || StringUtils.isBlank(findAgentId)){
+            return false;
+        }
+        else if(findAgentId.equals(agentId)){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
 
@@ -424,7 +494,7 @@ public class MessageEventHandler {
      * @param data    　客户端发送数据
      */
     @OnEvent(value = "onCustomerMessageEvent")
-    public void onCustomerMessageEvent(SocketIOClient socket, MessageInfo data) {
+    public void onCustomerMessageEvent(SocketIOClient socket, MessageInfo data, AckRequest ackRequest) {
         logger.info("onCustomerMessageEvent 发来消息：" + data.toString());
         socket.sendEvent(ConstElement.eventType_info,"收到你发来的消息"+data.toString());
 
@@ -437,8 +507,15 @@ public class MessageEventHandler {
         String msgChannel=data.getMsgChannel();
         String contentType=data.getContentType();
         String msgContent=data.getMsgContent();
+
         String serviceMode = data.getServiceMode();
         String agentId = "";
+
+        //客户发来的消息，首先要保证customerID不能没有
+        if(null == customerId || StringUtils.isBlank(customerId)){
+            socket.sendEvent(ConstElement.eventType_info,"onCustomerMessageEvent事件消息，customerId为空，服务器无法处理");
+            return;
+        }
 
         if(msgType.equals(ConstElement.msgType_chat)){
             /**
@@ -446,20 +523,21 @@ public class MessageEventHandler {
              */
             //人工模式
             if(null != serviceMode && ConstElement.serviceMode_person.equals(serviceMode)){
-                //通过源ID查询Map获取坐席ID
-                if(customerId != null && StringUtils.isNotBlank(customerId)) {
-                    agentId = customerToAgentMap.get(customerId);
-                    logger.info("通过customerId查询Map获取坐席ID agentId="+agentId);
+                //通过源ID查询Map获取坐席Id
+                agentId = customerToAgentMap.get(customerId);
+                logger.info("通过customerId查询Map获取坐席ID agentId="+agentId);
 
-                    //通过坐席ID查询到坐席的socket连接对象，进行消息转发
-                    if(agentId != null && StringUtils.isNotBlank(agentId)){
-                        SocketIOClient agentSocketIOClient = agentToSocketMap.get(agentId);
-                        if (agentSocketIOClient!=null && agentSocketIOClient.isChannelOpen()) {
-                            //通过坐席socket连接对象转发该消息
-                            data.setServiceMode(ConstElement.serviceMode_person);
-                            agentSocketIOClient.sendEvent(ConstElement.eventType_agentMsg, data);
-                        }
+                //通过坐席ID查询到坐席的socket连接对象，进行消息转发
+                if(agentId != null && StringUtils.isNotBlank(agentId)){
+                    SocketIOClient agentSocketIOClient = agentToSocketMap.get(agentId);
+                    if (agentSocketIOClient != null) {
+                        //通过坐席socket连接对象转发该消息
+                        data.setServiceMode(ConstElement.serviceMode_person);
+                        agentSocketIOClient.sendEvent(ConstElement.eventType_agentMsg, data);
                     }
+                }
+                else{ //如果没有找到客户座席对应表需要重新分配人工座席
+                    toAllocateBySocketAndData(socket,data);
                 }
             }
             else{ //机器人聊天模式
@@ -496,17 +574,8 @@ public class MessageEventHandler {
             String commandType = data.getCommandType();
             if(null != commandType && ConstElement.commandType_toAgent.equals(commandType)){
                 // 1、查询是否有座席为他服务，如果有不予理会
-                String strAgentID = customerToAgentMap.get(customerId);
-                if(null == strAgentID || StringUtils.isBlank(strAgentID)){
-                    data.setServiceMode(ConstElement.serviceMode_person);
-                    data.setSenderName(ConstElement.senderName_server);
-                    data.setMsgType(ConstElement.msgType_notice);
-                    data.setNoticeContent("正在为您分配人工座席，请稍后……");
-                    socket.sendEvent(ConstElement.eventType_notice,data);
-                    //添加到排队
-                    customerQueue.add(customerId);
-                    //触发分配座席
-                    allocateAgent();
+                if(!customerToAgentMap.containsKey(customerId)){
+                    toAllocateBySocketAndData(socket,data);
                 }
                 else{
                     data.setServiceMode(ConstElement.serviceMode_person);
@@ -520,23 +589,29 @@ public class MessageEventHandler {
             else if(null != commandType && ConstElement.commandType_toRobot.equals(commandType)){
                 //客户端发起转机器人操作步骤
                 // 1、如果客户等待队列有该客户，删除他，因为已经不需要人工座席服务了。
-                for(int i=0; i<customerQueue.size(); i++){
-                    if(customerQueue.get(i) == customerId){
-                        customerQueue.remove(i);
-                        i--;
-                    }
-                }
+                customerQueue.remove(customerId);
                 // 2、查找是否有座席为他服务，如果有取消他的服务，给座席端发消息
                 String strAgentID = customerToAgentMap.remove(customerId);
                 logger.info("找到为该客户服务的座席，准备断开，strAgentID="+strAgentID);
                 if(null != strAgentID && StringUtils.isNotBlank(strAgentID)) {
                     SocketIOClient socketAgent = agentToSocketMap.get(strAgentID);
                     if (null != socketAgent) {
+                        /**
                         data.setMsgType(ConstElement.msgType_notice);
                         data.setSenderName(ConstElement.senderName_server);
                         data.setAgentId(strAgentID);
-                        data.setNoticeContent("客户转为机器人服务，该人工服务结束");
-                        socketAgent.sendEvent(ConstElement.eventType_notice, data);
+                        data.setNoticeContent("客户转为智能服务，该人工服务结束");
+                        */
+
+                        MessageInfo noticeMsg = new MessageInfo();
+                        noticeMsg.setMsgType(ConstElement.msgType_notice);
+                        noticeMsg.setSenderName(ConstElement.senderName_server);
+                        noticeMsg.setAgentId(strAgentID);
+                        noticeMsg.setCustomerId(data.getCustomerId());
+                        noticeMsg.setServiceId(data.getServiceId());
+                        noticeMsg.setServiceMode(data.getServiceMode());
+                        noticeMsg.setNoticeContent("客户转为智能服务，该人工服务结束");
+                        socketAgent.sendEvent(ConstElement.eventType_notice, noticeMsg);
 
                         //客户已经断开，该坐席的当前服务结束，释放一个服务客户资源，需要处理后续内容，与分配相关。
                     }
@@ -546,7 +621,7 @@ public class MessageEventHandler {
                 data.setServiceMode(ConstElement.serviceMode_chatRobot);
                 data.setSenderName(ConstElement.senderName_server);
                 data.setMsgType(ConstElement.msgType_notice);
-                data.setNoticeContent("机器人小软为您服务，请输入您要咨询的问题……");
+                data.setNoticeContent("智能客服小软为您服务，请输入您要咨询的问题……");
                 socket.sendEvent(ConstElement.eventType_notice,data);
             }
             else if(null != commandType && ConstElement.commandType_toDisconnect.equals(commandType)){
@@ -607,7 +682,7 @@ public class MessageEventHandler {
      * @param data    　坐席端发送数据
      */
     @OnEvent(value = "onAgentMessageEvent")
-    public void onAgentMessageEvent(SocketIOClient socket, MessageInfo data) {
+    public void onAgentMessageEvent(SocketIOClient socket, MessageInfo data, AckRequest ackRequest) {
 
         logger.info("onAgentMessageEvent 发来消息：" + data.toString());
         socket.sendEvent(ConstElement.eventType_notice,"收到你发来的消息"+data.toString());
@@ -626,46 +701,78 @@ public class MessageEventHandler {
 
         //聊天类型的消息，需要进行转发
         if(msgType.equals(ConstElement.msgType_chat)){
+            //判断座席是否关联该客户，如果已经没有关联，提示座席该客户已经结束服务，消息不再转发
+            if(!isRelatedWithAgentBetweenCustomer(agentId,customerId)){
+                //给座席端发送提示信息
+                data.setMsgType(ConstElement.msgType_notice);
+                data.setSenderName(ConstElement.senderName_server);
+                data.setNoticeContent("客户已经断开，请结束该客户服务……");
+                socket.sendEvent(ConstElement.eventType_notice,data);
+            }
+            else {
+                if(null != customerId && StringUtils.isNotBlank(customerId) && null != agentId && StringUtils.isNotBlank(agentId)){
+                    //通过客户ID查询到客户的socket连接对象
+                    SocketIOClient customerSocketIOClient = customerToSocketMap.get(customerId);
 
-            if(null != customerId && StringUtils.isNotBlank(customerId) && null != agentId && StringUtils.isNotBlank(agentId)){
-                //通过客户ID查询到客户的socket连接对象
-                SocketIOClient customerSocketIOClient = customerToSocketMap.get(customerId);
+                    if (customerSocketIOClient != null) {
+                        //通过客户socket连接对象转发该消息
+                        customerSocketIOClient.sendEvent(ConstElement.eventType_customerMsg, data);
 
-                if (customerSocketIOClient != null && customerSocketIOClient.isChannelOpen()) {
-                    //通过客户socket连接对象转发该消息
-                    customerSocketIOClient.sendEvent(ConstElement.eventType_customerMsg, data);
-
-                    try {
-                        Map<String, Object> map = new HashMap<String, Object>();
-                        map.put("serviceId",serviceId);
-                        map.put("senderName",senderName);
-                        map.put("agentCode",agentId);
-                        map.put("agentName",agentName);
-                        map.put("customerId",customerId);
-                        map.put("msgType",msgType);
-                        map.put("msgChannel",msgChannel);
-                        map.put("contentType",contentType);
-                        map.put("msgContent",msgContent);
-                        map.put("createTime",new Date());
-                        HttpResult httpResult =httpAPIService.doPostJson(crmmessageinfoSaveUrl,map);
-                        logger.info(httpResult.getBody());
+                        try {
+                            Map<String, Object> map = new HashMap<String, Object>();
+                            map.put("serviceId",serviceId);
+                            map.put("senderName",senderName);
+                            map.put("agentCode",agentId);
+                            map.put("agentName",agentName);
+                            map.put("customerId",customerId);
+                            map.put("msgType",msgType);
+                            map.put("msgChannel",msgChannel);
+                            map.put("contentType",contentType);
+                            map.put("msgContent",msgContent);
+                            map.put("createTime",new Date());
+                            HttpResult httpResult =httpAPIService.doPostJson(crmmessageinfoSaveUrl,map);
+                            logger.info(httpResult.getBody());
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                            logger.info(e.toString());
+                        }
                     }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                        logger.info(e.toString());
+                    else{
+                        // 通过customerToSocketMap没有找到客户socket信息
+                        // 有可能客户意外断开，服务器没有收到断开消息，也有可能是其他，这个时候解除对应关系；
+                        // 删除该客户的所有信息
+                        customerToAgentMap.remove(customerId);
+                        customerStatusMap.remove(customerId);
+                        customerToSocketMap.remove(customerId);
+                        customerQueue.remove(customerId);
+                        //删除该sockeid对应客户id的map中的值
+                        Iterator<ConcurrentHashMap.Entry<String, String>> entries = socketSessionToCustomerMap.entrySet().iterator();
+                        while(entries.hasNext()){
+                            ConcurrentHashMap.Entry<String, String> entry = entries.next();
+                            if(customerId.equals(entry.getValue())){
+                                entries.remove();
+                            }
+                        }
+
+                        //给座席端发送提示信息
+                        data.setMsgType(ConstElement.msgType_notice);
+                        data.setSenderName(ConstElement.senderName_server);
+                        data.setNoticeContent("客户已经断开，请结束该服务");
+                        socket.sendEvent(ConstElement.eventType_notice,data);
                     }
                 }
-            }
-            else{
-                socket.sendEvent(ConstElement.eventType_info,"服务器：座席ID或者客户ID为空，数据不完整");
+                else{
+                    socket.sendEvent(ConstElement.eventType_info,"服务器：座席ID或者客户ID为空，数据不完整");
+                }
             }
         }
         //命令类型的消息，针对命令定义的action进行相应的操作
         else if(msgType.equals(ConstElement.msgType_command)){
             String commandType = data.getCommandType();
             if(null != commandType && ConstElement.commandType_toDisconnect.equals(commandType)){
-                //座席端主动结束服务，服务器对指定结束的customerId做断开处理，之后会有OnDisconnect
+                //座席端主动结束服务，如果客户没有断开，将客户转为智能客服
                 if(null != customerId && StringUtils.isNotBlank(customerId)){
                     SocketIOClient socketCustomer = customerToSocketMap.get(customerId);
                     if(null != socketCustomer){
@@ -677,29 +784,31 @@ public class MessageEventHandler {
 
                         // 2、给客户端发送一条提示消息
                         data.setMsgType(ConstElement.msgType_notice);
-                        data.setNoticeContent("人工已经结束本次服务，已经为您转为智能客服");
+                        data.setNoticeContent("已经结束本次人工服务，并转为智能客服……");
                         data.setSenderName(ConstElement.senderName_server);
                         data.setServiceMode(ConstElement.serviceMode_chatRobot);
                         socketCustomer.sendEvent(ConstElement.eventType_notice,data);
 
                         // 3、解除客户与座席对应关系
                         customerToAgentMap.remove(customerId);
+                        customerQueue.remove(customerId);
                     }
                 }
             }
             else
             {
                 //非法消息，或者不正常消息
-                socket.sendEvent(ConstElement.eventType_info,"消息不符合格式协议:"+data.getMsgContent());
+                socket.sendEvent(ConstElement.eventType_info,"onAgentMessageEvent 消息不符合格式协议:"+data.getMsgContent());
             }
         }
         //通知类的消息，做相应的处理
         else if(msgType.equals(ConstElement.msgType_notice)){
             //客户发来的notice消息无需处理
+            socket.sendEvent(ConstElement.eventType_info,"你一个座席给服务器发什么Notice消息");
         }
         else{
             //非法消息，或者不正常消息
-            socket.sendEvent(ConstElement.eventType_info,"消息不符合格式协议:"+data.getMsgContent());
+            socket.sendEvent(ConstElement.eventType_info,"onAgentMessageEvent 消息不符合格式协议:"+data.getMsgContent());
         }
     }
 
@@ -707,7 +816,7 @@ public class MessageEventHandler {
      *
      */
     private void allocateAgent(){
-        logger.info("客户队列里有"+customerQueue.size()+"个客户等待");
+        logger.info("客户队列里有"+customerQueue.size()+"个客户等待，客户队列内容" + customerQueue.toString());
         if(customerQueue.size() == 0){
             return;
         }
@@ -735,10 +844,12 @@ public class MessageEventHandler {
                 msgInfoAgent.setCommandType(ConstElement.commandType_toAgent);
                 msgInfoAgent.setMsgType(ConstElement.msgType_command);
                 msgInfoAgent.setMsgContent("为你分配了新的客户,客户ID="+customerId);
-                msgInfoAgent.setMsgChannel(ConstElement.chanType_webchat);
+                msgInfoAgent.setMsgChannel(ConstElement.channel_webchat);
                 msgInfoAgent.setServiceMode(ConstElement.serviceMode_person);
                 SocketIOClient socketAgent = agentToSocketMap.get(allocAgentId);
-                socketAgent.sendEvent(ConstElement.eventType_agentMsg,msgInfoAgent);
+                if(null != socketAgent){
+                    socketAgent.sendEvent(ConstElement.eventType_agentMsg,msgInfoAgent);
+                }
 
                 //给客户发通知消息
                 MessageInfo msgInfoCus = new MessageInfo();
@@ -748,9 +859,11 @@ public class MessageEventHandler {
                 msgInfoCus.setMsgType(ConstElement.msgType_notice);
                 msgInfoCus.setNoticeContent("已经为您分配座席，坐席ID="+allocAgentId);
                 msgInfoCus.setServiceMode(ConstElement.serviceMode_person);
-                msgInfoCus.setMsgChannel(ConstElement.chanType_webchat);
+                msgInfoCus.setMsgChannel(ConstElement.channel_webchat);
                 SocketIOClient socketCustomer = customerToSocketMap.get(customerId);
-                socketCustomer.sendEvent(ConstElement.eventType_notice,msgInfoCus);
+                if(null != socketCustomer){
+                    socketCustomer.sendEvent(ConstElement.eventType_notice,msgInfoCus);
+                }
 
                 it.remove();
 
@@ -790,7 +903,8 @@ public class MessageEventHandler {
         else{
             data.setMsgType(ConstElement.msgType_notice);
             data.setServiceMode(ConstElement.serviceMode_chatRobot);
-            data.setNoticeContent("机器人繁忙中，请转人工坐席服务");
+            data.setSenderName(ConstElement.senderName_server);
+            data.setNoticeContent("机器人繁忙中，请稍后或者转人工坐席服务");
             socket.sendEvent(ConstElement.eventType_notice,data);
         }
     }
