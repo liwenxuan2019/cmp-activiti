@@ -128,13 +128,21 @@ public class MessageEventHandler {
             customerInfo.setConnectTime(connectTime);
 
             //存储客户SocketIOClient，用于发送消息
+            logger.info("onConnect 客户注册：customerToSocketMap = " + customerToSocketMap.toString());
             customerToSocketMap.put(customerId, socket);
+            logger.info("onConnect 客户注册-注册后：customerToSocketMap = " + customerToSocketMap.toString());
             //存储客户状态对象
+
+            logger.info("onConnect 客户注册：customerStatusMap = " + customerStatusMap.toString());
             customerStatusMap.put(customerId,customerInfo);
+            logger.info("onConnect 客户注册-注册后：customerStatusMap = " + customerStatusMap.toString());
             //存储socket对象对应的客户ID
 
             String socketCustomerKey = socket.getSessionId() + socket.getRemoteAddress().toString();
+
+            logger.info("onConnect 客户注册：socketSessionToCustomerMap = " + socketSessionToCustomerMap.toString());
             socketSessionToCustomerMap.put(socketCustomerKey,customerId);
+            logger.info("onConnect 客户注册-注册后：socketSessionToCustomerMap = " + socketSessionToCustomerMap.toString());
 
             logger.info("客户端已连接 customerId=" + customerId+",customerName=" + customerName+",客户访问渠道=" + accessChannel+",客户ip地址=" + customerIpAddress+",接入时间="+connectTime);
 
@@ -213,14 +221,16 @@ public class MessageEventHandler {
             //存储坐席SocketIOClient，用于发送消息
             logger.info("onConnect 座席注册：agentToSocketMap = " + agentToSocketMap.toString());
             agentToSocketMap.put(agentId, socket);
+            logger.info("onConnect 座席注册-注册后：agentToSocketMap = " + agentToSocketMap.toString());
             //存储坐席状态对象
             logger.info("onConnect 座席注册：agentStatusMap = " + agentStatusMap.toString());
             agentStatusMap.put(agentId,agentInfo);
+            logger.info("onConnect 座席注册-注册后：agentStatusMap = " + agentStatusMap.toString());
             //存储socket对座席id
             logger.info("onConnect 座席注册：socketSessionToAgentMap = " + socketSessionToAgentMap.toString());
             String socketAgentKey = socket.getSessionId() + socket.getRemoteAddress().toString();
             socketSessionToAgentMap.put(socketAgentKey,agentId);
-            logger.info("onConnect 座席注册：socketSessionToAgentMap加入后 = " + socketSessionToAgentMap.toString());
+            logger.info("onConnect 座席注册-注册后：socketSessionToAgentMap = " + socketSessionToAgentMap.toString());
 
             //回发消息,通过定义好的方式进行
             MessageInfo msgInfo = new MessageInfo();
