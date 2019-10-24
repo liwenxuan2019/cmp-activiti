@@ -156,8 +156,8 @@ public class MessageEventHandler {
             if(null != serviceMode && ConstElement.serviceMode_person.equals(serviceMode)){
                 noticeInfo.setMsgType(ConstElement.msgType_notice);
                 noticeInfo.setSenderName(ConstElement.senderName_server);
-                noticeInfo.setServiceMode(ConstElement.serviceMode_person);
-                noticeInfo.setNoticeContent("已经建立连接，正在为您分配座席，请稍等……");
+                noticeInfo.setServiceMode(ConstElement.serviceMode_chatRobot); //在分配成功之前先设为机器人模式，在allocateAgent分配函数中如果成功会设为人工模式
+                noticeInfo.setNoticeContent("正在为您分配座席，请稍等……");
                 socket.sendEvent(ConstElement.eventType_notice, noticeInfo);
                 //将客户ID添加到待分配队列
                 addCustomerQueue(customerId);
@@ -169,8 +169,18 @@ public class MessageEventHandler {
                 noticeInfo.setServiceMode(ConstElement.serviceMode_chatRobot);
                 noticeInfo.setSenderName(ConstElement.senderName_server);
                 noticeInfo.setServiceId(UUID.randomUUID().toString().replace("-",""));
-                noticeInfo.setNoticeContent("机器人小软为您服务，请输入您要咨询的问题……");
+                noticeInfo.setNoticeContent("智能客服小科为您服务……");
                 socket.sendEvent(ConstElement.eventType_notice, noticeInfo);
+
+                if(StringUtils.isNotBlank(accessChannel) && accessChannel.equals(ConstElement.channel_weixin_web)){
+                    MessageInfo data = new MessageInfo();
+                    data.setMsgType(ConstElement.msgType_chat);
+                    data.setServiceMode(ConstElement.serviceMode_chatRobot);
+                    data.setSenderName(ConstElement.senderName_server);
+                    data.setServiceMode(UUID.randomUUID().toString().replace("-",""));
+                    data.setMsgContent("广东");
+                    chatWithRobot(socket,data);
+                }
             }
 
 
@@ -214,7 +224,7 @@ public class MessageEventHandler {
             agentInfo.setAgentName(agentName);
             agentInfo.setAuthorizationChannel(authorizationChannel);
             agentInfo.setAgentStatus("1");
-            agentInfo.setServiceNum(5);
+            agentInfo.setServiceNum(10);
             agentInfo.setIpAddress(agentIpAddress);
             agentInfo.setConnectTime(connectTime);
 
@@ -325,16 +335,16 @@ public class MessageEventHandler {
                             msgInfo.setCustomerId(customerId);
                             msgInfo.setSenderName(ConstElement.senderName_server);
                             msgInfo.setNoticeContent(getAllocateNoticeMessage());
-                            msgInfo.setServiceMode(ConstElement.serviceMode_person);
+                            msgInfo.setServiceMode(ConstElement.serviceMode_chatRobot); //在没有分配座席成功时设为机器人模式
                             socketCustomer.sendEvent(ConstElement.eventType_notice, msgInfo);
 
                             //添加到排队
                             addCustomerQueue(customerId);
-                            //触发分配座席
-                            allocateAgent();
                         }
                     }
                 }
+                //触发分配座席
+                allocateAgent();
             }
         }
 
@@ -404,12 +414,12 @@ public class MessageEventHandler {
     private String getAllocateNoticeMessage(){
         int queueSize = customerQueue.size();
 
-        String noticeMessage = "正在为您分配人工座席，目前有" + String.valueOf(queueSize) + "个客户等待，";
+        String noticeMessage = "目前有" + String.valueOf(queueSize) + "个客户等待，";
         if(queueSize <= 1){
-            noticeMessage = noticeMessage + "将很快为您接通，请稍后……";
+            noticeMessage = noticeMessage + "请稍后……";
         }
         else{
-            noticeMessage = noticeMessage + "预计等待" + String.valueOf(queueSize*1.5) + "分钟，请您耐心等待，谢谢……";
+            noticeMessage = noticeMessage + "预计等待" + String.valueOf(queueSize*1.5) + "分钟，谢谢……";
         }
 
         return noticeMessage;
@@ -439,6 +449,7 @@ public class MessageEventHandler {
         data.setSenderName(ConstElement.senderName_server);
         data.setNoticeContent(getAllocateNoticeMessage());
         data.setMsgType(ConstElement.msgType_notice);
+        data.setServiceMode(ConstElement.serviceMode_chatRobot); //在没有分配成功之前先试用机器人服务
         socket.sendEvent(ConstElement.eventType_notice,data);
 
         // 4、分配人工座席
@@ -631,7 +642,7 @@ public class MessageEventHandler {
                 data.setServiceMode(ConstElement.serviceMode_chatRobot);
                 data.setSenderName(ConstElement.senderName_server);
                 data.setMsgType(ConstElement.msgType_notice);
-                data.setNoticeContent("智能客服小软为您服务，请输入您要咨询的问题……");
+                data.setNoticeContent("智能客服小科为您服务……");
                 socket.sendEvent(ConstElement.eventType_notice,data);
             }
             else if(null != commandType && ConstElement.commandType_toDisconnect.equals(commandType)){
@@ -695,7 +706,7 @@ public class MessageEventHandler {
     public void onAgentMessageEvent(SocketIOClient socket, MessageInfo data, AckRequest ackRequest) {
 
         logger.info("onAgentMessageEvent 发来消息：" + data.toString());
-        socket.sendEvent(ConstElement.eventType_notice,"收到你发来的消息"+data.toString());
+        socket.sendEvent(ConstElement.eventType_info,"收到你发来的消息"+data.toString());
 
         //从Messageinfo中获取源ID
         String serviceId=data.getServiceId();
@@ -826,22 +837,32 @@ public class MessageEventHandler {
      *
      */
     private void allocateAgent(){
-        logger.info("客户队列里有"+customerQueue.size()+"个客户等待，客户队列内容" + customerQueue.toString());
+        logger.info("allocateAgent == 》客户队列里有"+customerQueue.size()+"个客户等待，客户队列内容" + customerQueue.toString());
         if(customerQueue.size() == 0){
             return;
         }
 
         AcdUtils acdUtils =new AcdUtils();
+
         Iterator<String> it = customerQueue.iterator();
         while(it.hasNext()){
             String customerId = it.next();
-            String allocAgentId = acdUtils.distribution(agentStatusMap);
+            //获取客户的接入渠道
+            CustomerInfo customerInfo = customerStatusMap.get(customerId);
+            String accessChannel = "";
+            if(null != customerInfo) {
+                accessChannel = customerInfo.getAccessChannel();
+            }
 
-            if(allocAgentId!=null&&StringUtils.isNotBlank(allocAgentId)) {
+            //调用分配算法，选择合适的座席；
+            //String allocAgentId = acdUtils.distribution(agentStatusMap);
+            String allocAgentId = acdUtils.getCompatibleAgent(agentStatusMap,customerToAgentMap);
+
+            if(StringUtils.isNotBlank(allocAgentId)) {
                 //建立客户与坐席的对应表Map
                 customerToAgentMap.put(customerId, allocAgentId);
-                logger.info("customerId="+customerId+ "分配的座席ID="+allocAgentId);
-                logger.info("customerToAgentMap"+customerToAgentMap.toString());
+                logger.info("allocateAgent==》customerId="+customerId+ "分配的座席ID="+allocAgentId);
+                logger.info("allocateAgent==》customerToAgentMap"+customerToAgentMap.toString());
 
                 //产生服务id
                 String serviceId=UUID.randomUUID().toString().replace("-","");
@@ -854,11 +875,32 @@ public class MessageEventHandler {
                 msgInfoAgent.setCommandType(ConstElement.commandType_toAgent);
                 msgInfoAgent.setMsgType(ConstElement.msgType_command);
                 msgInfoAgent.setMsgContent("为你分配了新的客户,客户ID="+customerId);
-                msgInfoAgent.setMsgChannel(ConstElement.channel_webchat);
+
+                if(StringUtils.isNotBlank(accessChannel)){
+                    msgInfoAgent.setMsgChannel(accessChannel);  //
+                }
+
                 msgInfoAgent.setServiceMode(ConstElement.serviceMode_person);
                 SocketIOClient socketAgent = agentToSocketMap.get(allocAgentId);
+
                 if(null != socketAgent){
+                    logger.info("allocateAgent==> agentToSocketMap中找到的agentsocket="+socketAgent.getSessionId()+";agentToSocketMap = "+agentToSocketMap.toString());
                     socketAgent.sendEvent(ConstElement.eventType_agentMsg,msgInfoAgent);
+
+                    //发送通知消息
+                    MessageInfo notice = new MessageInfo();
+                    notice.setServiceId(serviceId);
+                    notice.setAgentId(allocAgentId);
+                    notice.setCustomerId(customerId);
+                    notice.setMsgType(ConstElement.msgType_notice);
+                    notice.setNoticeContent("为你分配了客户，客户ID=" + customerId);
+                    notice.setServiceMode(ConstElement.serviceMode_person);
+
+                    if(StringUtils.isNotBlank(accessChannel)){
+                        notice.setMsgChannel(accessChannel);  //
+                    }
+
+                    socketAgent.sendEvent(ConstElement.eventType_notice,notice);
                 }
 
                 //给客户发通知消息
@@ -869,7 +911,7 @@ public class MessageEventHandler {
                 msgInfoCus.setMsgType(ConstElement.msgType_notice);
                 msgInfoCus.setNoticeContent("已经为您分配座席，坐席ID="+allocAgentId);
                 msgInfoCus.setServiceMode(ConstElement.serviceMode_person);
-                msgInfoCus.setMsgChannel(ConstElement.channel_webchat);
+                msgInfoCus.setMsgChannel(accessChannel);
                 SocketIOClient socketCustomer = customerToSocketMap.get(customerId);
                 if(null != socketCustomer){
                     socketCustomer.sendEvent(ConstElement.eventType_notice,msgInfoCus);
@@ -903,7 +945,16 @@ public class MessageEventHandler {
      * 机器人聊天
      */
     public void chatWithRobot(SocketIOClient socket, MessageInfo data){
-        AnswerContent answerContent = nlpUtils.nlpSaaSQA(data.getServiceId(),data.getMsgContent(),robotChannel,robotCity,robotBusiness);
+        String msgContent = data.getMsgContent();
+        if(StringUtils.isBlank(msgContent)){
+            msgContent = "广东";
+        }
+        String serviceId = data.getServiceId();
+        if(StringUtils.isBlank(serviceId)){
+            serviceId = UUID.randomUUID().toString().replace("-","");
+        }
+
+        AnswerContent answerContent = nlpUtils.nlpSaaSQA(serviceId,msgContent,robotChannel,robotCity,robotBusiness);
         if(null != answerContent){
             data.setAnswerContent(answerContent);
             data.setSenderName(ConstElement.senderName_chatRobot);
@@ -914,13 +965,17 @@ public class MessageEventHandler {
             data.setMsgType(ConstElement.msgType_notice);
             data.setServiceMode(ConstElement.serviceMode_chatRobot);
             data.setSenderName(ConstElement.senderName_server);
-            data.setNoticeContent("机器人繁忙中，请稍后或者转人工坐席服务");
+            data.setNoticeContent("智能服务繁忙中，请稍后或者转人工坐席服务");
             socket.sendEvent(ConstElement.eventType_notice,data);
         }
     }
 
     //添加到客户队列
     private void addCustomerQueue(String customerId){
+        if(StringUtils.isBlank(customerId)){
+            return;
+        }
+
         if(false == customerQueue.contains(customerId)){
             customerQueue.add(customerId);
         }
