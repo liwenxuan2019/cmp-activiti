@@ -61,13 +61,14 @@ httpclient:
   maxTotal: 100
   socketTimeout: 10000
   staleConnectionCheckEnabled: true
-  crmCustomerInfoSaveUrl: http://39.106.222.4:8081/cmp/service/crmcustomerinfo/save
-  crmCustomerInfoUpdateUrl: http://39.106.222.4:8081/cmp/service/crmcustomerinfo/Update
-  crmAgentInfoSaveUrl: http://39.106.222.4:8081/cmp/service/crmagentinfo/save
-  crmAgentInfoUpdateUrl: http://39.106.222.4:8081/cmp/service/crmagentinfo/update
-  crmmessageinfoSaveUrl: http://39.106.222.4:8081/cmp/service/crmmessageinfo/save
-  crmagentcustomerserviceSaveUrl: http://39.106.222.4:8081/cmp/service/crmagentcustomerservice/save
+  crmCustomerInfoSaveUrl: http://localhost:8081/cmp/service/crmcustomerinfo/save
+  crmCustomerInfoUpdateUrl: http://localhost:8081/cmp/service/crmcustomerinfo/Update
+  crmAgentInfoSaveUrl: http://localhost:8081/cmp/service/crmagentinfo/save
+  crmAgentInfoUpdateUrl: http://localhost:8081/cmp/service/crmagentinfo/update
+  crmmessageinfoSaveUrl: http://localhost:8081/cmp/service/crmmessageinfo/save
+  crmagentcustomerserviceSaveUrl: http://localhost:8081/cmp/service/crmagentcustomerservice/save
   nlpSaaSQAUrl: http://125.91.117.72:8082/NLP4SaaSQA_V2/NLPAnalysis
+  weixinGetTokenUrl: https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential
 
 #机器人配置信息
 robot:
@@ -78,8 +79,8 @@ robot:
 # netty-socketio 配置
 socketio:
   #host: 172.16.204.9
-  #host: 192.168.31.94
-  host: 192.168.31.13
+  host: 192.168.31.94
+  #host: 192.168.31.230
   #host: 172.17.56.167
   port: 9092
   bossCount: 1

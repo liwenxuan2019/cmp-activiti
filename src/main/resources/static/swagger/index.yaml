@@ -90,6 +90,29 @@ paths:
           schema:
             $ref: file
 
+  /weixin/getToken:
+    get:
+      tags:
+        - 微信服务
+      summary: 获取token
+      produces:
+        - application/json
+      parameters:
+        - name: appid
+          description: appid
+          in: query
+          type: string
+          required: true
+        - name: secret
+          description: secret
+          in: query
+          type: string
+          required: true
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/R'
+
 
 #定义数据模型
 definitions:
