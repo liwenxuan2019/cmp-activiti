@@ -34,8 +34,16 @@ public class WeixinGetTokenController {
 
     @Value("${httpclient.weixinGetTokenUrl}")
     private String weixinGetTokenUrl;
+
+    @Value("${httpclient.weixinGetTicketUrl}")
+    private String weixinGetTicketUrl;
+
+
     //微信appid对应accessToken Map
     public static ConcurrentMap<String, String> appidToAccessTokenMap= new ConcurrentHashMap<>();
+
+    //微信appid对应ticket Map
+    public static ConcurrentMap<String, String> appidToTicketMap= new ConcurrentHashMap<>();
 
 
     @GetMapping("/getToken")
@@ -46,13 +54,28 @@ public class WeixinGetTokenController {
       logger.info("secret="+secret);
 
       String result= null;
+      String resultTicket= null;
         String accessTokenTemp=appidToAccessTokenMap.get(appid);
+        String ticketTemp=appidToTicketMap.get(appid);
+        logger.info("accessTokenTemp="+accessTokenTemp);
+        logger.info("ticketTemp="+ticketTemp);
+
         if(null!=accessTokenTemp && StringUtils.isNotBlank(accessTokenTemp)) {
             HashMap resultMap=new HashMap();
             resultMap.put("access_token",accessTokenTemp);
             resultMap.put("expires_in",7200);
             result =JSONObject.toJSONString(resultMap);
             logger.info("result="+result);
+
+            if(null!=ticketTemp && StringUtils.isNotBlank(ticketTemp)) {
+                HashMap resultTicketMap=new HashMap();
+                resultTicketMap.put("errcode",0);
+                resultTicketMap.put("errmsg","ok");
+                resultTicketMap.put("ticket",ticketTemp);
+                resultTicketMap.put("expires_in",7200);
+                resultTicket =JSONObject.toJSONString(resultTicketMap);
+                logger.info("resultTicket="+resultTicket);
+            }
         }
         else
         {
@@ -63,11 +86,23 @@ public class WeixinGetTokenController {
                     String access_token = jsonObject.getString("access_token");
                     logger.info("access_token=" + access_token);
                     appidToAccessTokenMap.put(appid, access_token);
+
+                    Map<String, Object> paramsToken=new HashMap<String, Object> ();
+                    paramsToken.put("access_token",access_token);
+                    paramsToken.put("type","jsapi");
+                    resultTicket = httpAPIService.doGet(weixinGetTicketUrl, paramsToken);
+                    if (null != resultTicket && StringUtils.isNotBlank(resultTicket)) {
+                        JSONObject jsonObjectTicket = JSONObject.parseObject(resultTicket);
+                        String ticket = jsonObjectTicket.getString("ticket");
+                        logger.info("ticket=" + ticket);
+                        appidToTicketMap.put(appid,ticket);
+                    }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return result;
+        return resultTicket;
     }
 }

@@ -69,6 +69,7 @@ httpclient:
   crmagentcustomerserviceSaveUrl: http://localhost:8081/cmp/service/crmagentcustomerservice/save
   nlpSaaSQAUrl: http://125.91.117.72:8082/NLP4SaaSQA_V2/NLPAnalysis
   weixinGetTokenUrl: https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential
+  weixinGetTicketUrl: https://api.weixin.qq.com/cgi-bin/ticket/getticket
 
 #机器人配置信息
 robot:
