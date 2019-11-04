@@ -35,15 +35,16 @@ public class WeixinGetTokenController {
     @Autowired
     private HttpAPIService httpAPIService;
 
-    @Autowired
-    private CrmWeixinAppidService crmWeixinAppidService;
-
     @Value("${httpclient.weixinGetTokenUrl}")
     private String weixinGetTokenUrl;
 
     @Value("${httpclient.weixinGetTicketUrl}")
     private String weixinGetTicketUrl;
 
+
+
+    //微信appid对应secret Map
+    public static ConcurrentMap<String, String> appidToSecretMap= new ConcurrentHashMap<>();
 
     //微信appid对应accessToken Map
     public static ConcurrentMap<String, String> appidToAccessTokenMap= new ConcurrentHashMap<>();
@@ -71,7 +72,7 @@ public class WeixinGetTokenController {
             resultMap.put("access_token",accessTokenTemp);
             resultMap.put("expires_in",7200);
             result =JSONObject.toJSONString(resultMap);
-            logger.info("result="+result);
+            logger.info("缓存中获取result="+result);
 
             if(null!=ticketTemp && StringUtils.isNotBlank(ticketTemp)) {
                 HashMap resultTicketMap=new HashMap();
@@ -80,15 +81,16 @@ public class WeixinGetTokenController {
                 resultTicketMap.put("ticket",ticketTemp);
                 resultTicketMap.put("expires_in",7200);
                 resultTicket =JSONObject.toJSONString(resultTicketMap);
-                logger.info("resultTicket="+resultTicket);
+                logger.info("缓存中获取resultTicket="+resultTicket);
+
             }
         }
         else
         {
             try {
                 result = httpAPIService.doGet(weixinGetTokenUrl, params);
-                logger.info("result=" + result);
                 if (result != null && StringUtils.isNotBlank(result)) {
+                    logger.info("接口中获取result=" + result);
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     String access_token = jsonObject.getString("access_token");
                     logger.info("access_token=" + access_token);
@@ -97,19 +99,23 @@ public class WeixinGetTokenController {
                     {
                     appidToAccessTokenMap.put(appid, access_token);
 
-                    CrmWeixinAppidEntity crmWeixinAppidEntity = new CrmWeixinAppidEntity();
-                    crmWeixinAppidEntity.setAppid(appid);
-                    crmWeixinAppidEntity.setAccessToken(access_token);
-                    crmWeixinAppidEntity.setCreateTime(new Date());
-                    crmWeixinAppidService.saveOrUpdate(crmWeixinAppidEntity);
+
+                    String appidToSecretMapTemp=appidToSecretMap.get(appid);
+                    logger.info("appidToSecretMapTemp="+appidToSecretMapTemp);
+                    if(appidToSecretMapTemp==null&&StringUtils.isBlank(appidToSecretMapTemp)) {
+                        appidToSecretMap.put(appid, secret);
+                        logger.info("secret="+appidToSecretMap.get(appid));
+
+                    }
 
 
                     Map<String, Object> paramsToken = new HashMap<String, Object>();
                     paramsToken.put("access_token", access_token);
                     paramsToken.put("type", "jsapi");
                     resultTicket = httpAPIService.doGet(weixinGetTicketUrl, paramsToken);
-                    logger.info("resultTicket=" + resultTicket);
+
                     if (resultTicket != null && StringUtils.isNotBlank(resultTicket)) {
+                        logger.info("接口中获取resultTicket=" + resultTicket);
                         JSONObject jsonObjectTicket = JSONObject.parseObject(resultTicket);
                         String ticket = jsonObjectTicket.getString("ticket");
                         logger.info("ticket=" + ticket);
@@ -127,4 +133,6 @@ public class WeixinGetTokenController {
         }
         return resultTicket;
     }
+
+
 }
