@@ -103,8 +103,8 @@ public class CmpApplication implements CommandLineRunner {
 							//10M秒刷新
 							//Thread.sleep(10000);
 
-							//1小时55分钟刷新
-							Thread.sleep(7199700);
+							//1小时
+							Thread.sleep(3600000);
 						}
 					}
 					catch (Exception e) {
