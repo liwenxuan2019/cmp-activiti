@@ -5,6 +5,8 @@ import com.corundumstudio.socketio.SocketIOClient;
 import io.cmp.common.exception.RRException;
 import io.cmp.common.utils.R;
 import io.cmp.modules.sys.service.HttpAPIService;
+import io.cmp.modules.weixin.entity.CrmWeixinAppidEntity;
+import io.cmp.modules.weixin.service.CrmWeixinAppidService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +34,9 @@ public class WeixinGetTokenController {
 
     @Autowired
     private HttpAPIService httpAPIService;
+
+    @Autowired
+    private CrmWeixinAppidService crmWeixinAppidService;
 
     @Value("${httpclient.weixinGetTokenUrl}")
     private String weixinGetTokenUrl;
@@ -86,6 +92,12 @@ public class WeixinGetTokenController {
                     String access_token = jsonObject.getString("access_token");
                     logger.info("access_token=" + access_token);
                     appidToAccessTokenMap.put(appid, access_token);
+
+                    CrmWeixinAppidEntity crmWeixinAppidEntity = new CrmWeixinAppidEntity();
+                    crmWeixinAppidEntity.setAppid(appid);
+                    crmWeixinAppidEntity.setAccessToken(access_token);
+                    crmWeixinAppidEntity.setCreateTime(new Date());
+                    crmWeixinAppidService.save(crmWeixinAppidEntity);
 
                     Map<String, Object> paramsToken=new HashMap<String, Object> ();
                     paramsToken.put("access_token",access_token);
