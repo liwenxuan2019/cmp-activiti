@@ -113,6 +113,143 @@ paths:
           schema:
             $ref: '#/definitions/R'
 
+  /weixin/crmweixinappid/list:
+    get:
+      tags:
+        - 微信appidtoken管理
+      summary: 微信appidtoken列表
+      produces:
+        - application/json
+      parameters:
+        - name: page
+          description: 页码
+          in: query
+          type: integer
+          required: true
+        - name: limit
+          description: 每页条数
+          in: query
+          type: integer
+          required: true
+        - name: sidx
+          description: 排序字段
+          in: query
+          type: string
+        - name: order
+          description: 排序方式，如：asc、desc
+          in: query
+          type: string
+        - name: id
+          description: ID
+          in: query
+          type: string
+        - name: appid
+          description: appid
+          in: query
+          type: string
+        - name: accessToken
+          description: accessToken
+          in: query
+          type: string
+        - name: startCreateTime
+          description: 开始创建时间
+          in: query
+          type: string
+          format: date
+        - name: endCreateTime
+          description: 结束创建时间
+          in: query
+          type: string
+          format: date
+      responses:
+        '200':
+          description: 返回微信appidtoken列表
+          schema:
+            $ref: '#/definitions/CrmWeixinAppidEntityList'
+  /weixin/crmweixinappid/info/{id}:
+    get:
+      tags:
+        - 微信appidtoken管理
+      summary: 获取微信appidtoken信息
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          description: ID
+          in: path
+          type: string
+          required: true
+      responses:
+        '200':
+          description: 返回微信appidtoken信息
+          schema:
+            type: object
+            properties:
+              code:
+                description: 状态码 0：成功  非0：失败
+                type: integer
+                format: int32
+              crmweixinappid:
+                $ref: '#/definitions/CrmWeixinAppidEntity'
+  /weixin/crmweixinappid/save:
+    post:
+      tags:
+        - 微信appidtoken管理
+      summary: 添加微信appidtoken
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: 微信appidtoken对象
+          in: body
+          type: string
+          schema:
+            $ref: '#/definitions/CrmWeixinAppidEntity'
+          required: true
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/R'
+  /weixin/crmweixinappid/update:
+    post:
+      tags:
+        - 微信appidtoken管理
+      summary: 修改微信appidtoken
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: 微信appidtoken对象
+          in: body
+          type: string
+          schema:
+            $ref: '#/definitions/CrmWeixinAppidEntity'
+          required: true
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/R'
+  /weixin/crmweixinappid/delete:
+    post:
+      tags:
+        - 微信appidtoken管理
+      summary: 删除微信appidtoken
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: 微信appidtokenID列表
+          in: body
+          type: array
+          items:
+            type: string
+            default: 0
+          required: true
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/R'
+
 
 #定义数据模型
 definitions:
@@ -156,3 +293,50 @@ definitions:
         description: 分机号
         type: string
 
+  CrmWeixinAppidEntity:
+    type: object
+    properties:
+      id:
+        description: ID
+        type: string
+      appid:
+        description: appid
+        type: string
+      accessToken:
+        description: accessToken
+        type: string
+      createTime:
+        description: 创建时间
+        type: string
+        format: date
+
+  CrmWeixinAppidEntityList:
+    type: object
+    properties:
+      code:
+        description: 状态码 0：成功  非0：失败
+        type: integer
+        format: int32
+      page:
+        type: object
+        properties:
+          totalCount:
+            description: 总记录数
+            type: integer
+            format: int32
+          pageSize:
+            description: 每页记录数
+            type: integer
+            format: int32
+          totalPage:
+            description: 总页数
+            type: integer
+            format: int32
+          currPage:
+            description: 当前页数
+            type: integer
+            format: int32
+          list:
+            type: array
+            items:
+              $ref: '#/definitions/CrmWeixinAppidEntity'
