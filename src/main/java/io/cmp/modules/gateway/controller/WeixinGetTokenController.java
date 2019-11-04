@@ -87,33 +87,43 @@ public class WeixinGetTokenController {
         {
             try {
                 result = httpAPIService.doGet(weixinGetTokenUrl, params);
-                if (null != result && StringUtils.isNotBlank(result)) {
+                logger.info("result=" + result);
+                if (result != null && StringUtils.isNotBlank(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     String access_token = jsonObject.getString("access_token");
                     logger.info("access_token=" + access_token);
+
+                    if(access_token!=null && StringUtils.isNotBlank(access_token))
+                    {
                     appidToAccessTokenMap.put(appid, access_token);
 
                     CrmWeixinAppidEntity crmWeixinAppidEntity = new CrmWeixinAppidEntity();
                     crmWeixinAppidEntity.setAppid(appid);
                     crmWeixinAppidEntity.setAccessToken(access_token);
                     crmWeixinAppidEntity.setCreateTime(new Date());
-                    crmWeixinAppidService.save(crmWeixinAppidEntity);
+                    crmWeixinAppidService.saveOrUpdate(crmWeixinAppidEntity);
 
-                    Map<String, Object> paramsToken=new HashMap<String, Object> ();
-                    paramsToken.put("access_token",access_token);
-                    paramsToken.put("type","jsapi");
+
+                    Map<String, Object> paramsToken = new HashMap<String, Object>();
+                    paramsToken.put("access_token", access_token);
+                    paramsToken.put("type", "jsapi");
                     resultTicket = httpAPIService.doGet(weixinGetTicketUrl, paramsToken);
-                    if (null != resultTicket && StringUtils.isNotBlank(resultTicket)) {
+                    logger.info("resultTicket=" + resultTicket);
+                    if (resultTicket != null && StringUtils.isNotBlank(resultTicket)) {
                         JSONObject jsonObjectTicket = JSONObject.parseObject(resultTicket);
                         String ticket = jsonObjectTicket.getString("ticket");
                         logger.info("ticket=" + ticket);
-                        appidToTicketMap.put(appid,ticket);
+                    if(ticket!=null && StringUtils.isNotBlank(ticket)) {
+                        appidToTicketMap.put(appid, ticket);
+                    }
                     }
 
                 }
+            }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
         }
         return resultTicket;
     }
