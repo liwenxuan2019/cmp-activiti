@@ -113,6 +113,34 @@ paths:
           schema:
             $ref: '#/definitions/R'
 
+  /weixin/getUserInfo:
+    get:
+      tags:
+        - 微信服务
+      summary: 获取用户信息
+      produces:
+        - application/json
+      parameters:
+        - name: appid
+          description: appid
+          in: query
+          type: string
+          required: true
+        - name: secret
+          description: secret
+          in: query
+          type: string
+          required: true
+        - name: code
+          description: code
+          in: query
+          type: string
+          required: true
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/R'
+
   /weixin/crmweixinappid/list:
     get:
       tags:

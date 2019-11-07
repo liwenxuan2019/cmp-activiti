@@ -71,6 +71,8 @@ httpclient:
   weixinGetTokenUrl: https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential
   weixinGetTicketUrl: https://api.weixin.qq.com/cgi-bin/ticket/getticket
   weixinGetTokenControllerUrl: http://localhost:8888/cmp-gateway/weixin/getToken
+  weixinGetAccessTokenUrl: https://api.weixin.qq.com/sns/oauth2/access_token?grant_type=authorization_code
+  weixinGetUserInfoUrl: https://api.weixin.qq.com/sns/userinfo?lang=zh_CN
 
 #机器人配置信息
 robot:
@@ -83,7 +85,8 @@ socketio:
   #host: 172.16.204.9
   #host: 192.168.31.94
   #host: 192.168.31.230
-  host: 172.17.56.167
+  host: 172.31.51.109
+  #host: 172.17.56.167
   port: 9092
   bossCount: 1
   workCount: 100
