@@ -40,7 +40,7 @@
 		<fastjson.version>1.2.47</fastjson.version>
 		<hutool.version>4.1.1</hutool.version>
 		<lombok.version>1.18.4</lombok.version>
-		<httpclient.version>4.4</httpclient.version>
+		<httpclient.version>4.5.13</httpclient.version>
 		<netty-socketio.version>1.7.17</netty-socketio.version>
 
 		<!--wagon plugin 配置-->
